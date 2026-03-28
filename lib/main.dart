@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import '../firebase_options.dart';
+import 'screens/welcome_flow/welcome.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
@@ -12,71 +16,96 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(title: const Text("اختبار Firebase")),
-        body: const Center(child: FirebaseCheckWidget()),
+      home: FirebaseCheckScreen(),
+    );
+  }
+}
+
+/// Firebase Check Screen
+class FirebaseCheckScreen extends StatelessWidget {
+  const FirebaseCheckScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder(
+        future: Future.delayed(const Duration(seconds: 3)),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return const OnboardingScreen();
+          }
+        },
       ),
     );
   }
 }
 
-class FirebaseCheckWidget extends StatefulWidget {
-  const FirebaseCheckWidget({super.key});
-
-  @override
-  State<FirebaseCheckWidget> createState() => _FirebaseCheckWidgetState();
-}
-
-class _FirebaseCheckWidgetState extends State<FirebaseCheckWidget> {
-  late Future<FirebaseApp> _firebaseApp;
-
-  @override
-  void initState() {
-    super.initState();
-    _firebaseApp = _initFirebase();
-  }
-
-  Future<FirebaseApp> _initFirebase() async {
-    try {
-      // إذا كان Firebase موجود مسبقاً يرجع الـ default instance
-      return Firebase.apps.isEmpty
-          ? await Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform,
-            )
-          : Firebase.apps.first;
-    } catch (e) {
-      // أي خطأ يرجع الـ default instance
-      return Firebase.apps.first;
-    }
-  }
+/// Navigo Splash Screen
+class NavigoSplashScreen extends StatelessWidget {
+  const NavigoSplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<FirebaseApp>(
-      future: _firebaseApp,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text(
-            "جارٍ اختبار الاتصال بـ Firebase...",
-            style: TextStyle(fontSize: 20, color: Colors.orange),
-            textAlign: TextAlign.center,
-          );
-        } else if (snapshot.hasError) {
-          return Text(
-            "❌ فشل الاتصال: ${snapshot.error}",
-            style: const TextStyle(fontSize: 20, color: Colors.red),
-            textAlign: TextAlign.center,
-          );
-        } else {
-          return const Text(
-            "✅ Firebase متصل بنجاح!",
-            style: TextStyle(fontSize: 20, color: Colors.green),
-            textAlign: TextAlign.center,
-          );
-        }
-      },
+    return Scaffold(
+      body: Container(
+        color: const Color(0xFFF9BC58),
+        child: Stack(
+          children: [
+            /// Logo
+            Positioned(
+              left: 76,
+              top: 201,
+              child: Container(
+                width: 250,
+                height: 320,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage("https://placehold.co/250x320"),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+            ),
+
+            /// Title
+            Positioned(
+              left: 119,
+              top: 537,
+              child: Text(
+                'Navigo-وصلني',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: const Color(0xFF111827),
+                  fontSize: 24,
+                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+
+            /// Subtitle
+            Positioned(
+              left: 108,
+              top: 582,
+              child: Text(
+                'Smart Transportation Platform',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: const Color(0xFF6B7280),
+                  fontSize: 13,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
