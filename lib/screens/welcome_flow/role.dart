@@ -1,27 +1,43 @@
 import 'package:flutter/material.dart';
 import '../authentication/PhoneNumberScreen.dart';
 
+// 👇 Import your signup screens
+import '../authentication/Passenger_Sign Up.dart';
+import '../authentication/Driver_Signup.dart';
+
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({Key? key}) : super(key: key);
 
-  void _onRoleSelected(String role) {
-    debugPrint('Selected role: $role');
-  }
-
-  void _onSignInTap() {
-    debugPrint('Navigate to sign in');
+  // ✅ Handle role selection + navigation
+  void _onRoleSelected(BuildContext context, String role) {
+    if (role == 'passenger') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PassengerSignupScreen(),
+        ),
+      );
+    } else if (role == 'driver') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DriverSignupScreen(),
+        ),
+      );
+    }
   }
 
   Widget _buildRoleButton(
+    BuildContext context,
     String title,
     String description,
     IconData icon,
-    VoidCallback onTap,
+    String role,
   ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: onTap,
+        onPressed: () => _onRoleSelected(context, role),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.orange, width: 2),
           shape: RoundedRectangleBorder(
@@ -57,7 +73,10 @@ class RoleSelectionScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
                   ),
                 ],
               ),
@@ -77,9 +96,7 @@ class RoleSelectionScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Card(
-              color: const Color(
-                0xFFFAFAFA,
-              ), // Slightly lighter off-white for card
+              color: const Color(0xFFFAFAFA),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -106,30 +123,41 @@ class RoleSelectionScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
+
+                    // ✅ Passenger
                     _buildRoleButton(
+                      context,
                       'Passenger',
                       'Browse routes and request trips',
                       Icons.person_outline,
-                      () => _onRoleSelected('passenger'),
+                      'passenger',
                     ),
+
                     const SizedBox(height: 16),
+
+                    // ✅ Driver
                     _buildRoleButton(
+                      context,
                       'Driver',
                       'Accept trips and manage availability',
                       Icons.drive_eta,
-                      () => _onRoleSelected('driver'),
+                      'driver',
                     ),
+
                     const SizedBox(height: 24),
+
                     const Text(
                       "Already have an account?",
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
+
                     TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PhoneNumberScreen(),
+                            builder: (context) =>
+                                const PhoneNumberScreen(),
                           ),
                         );
                       },
