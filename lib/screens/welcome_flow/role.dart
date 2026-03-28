@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../authentication/PhoneNumberScreen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({Key? key}) : super(key: key);
@@ -14,38 +15,33 @@ class RoleSelectionScreen extends StatelessWidget {
   Widget _buildRoleButton(
     String title,
     String description,
+    IconData icon,
     VoidCallback onTap,
   ) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: OutlinedButton(
         onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFE7F8F5),
-          foregroundColor: Colors.black87,
-          elevation: 1,
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.orange, width: 2),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            side: const BorderSide(color: Colors.white, width: 1),
+            borderRadius: BorderRadius.circular(16),
           ),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          backgroundColor: Colors.white,
         ),
         child: Row(
           children: [
             Container(
-              width: 40.0,
-              height: 40.0,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12.0),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.person,
-                size: 20.0,
-                color: Colors.black87,
-              ),
+              child: Icon(icon, color: Colors.green, size: 24),
             ),
-            const SizedBox(width: 12.0),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,18 +49,15 @@ class RoleSelectionScreen extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w700,
-                      fontStyle: FontStyle.italic,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 6.0),
+                  const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.black87,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                 ],
               ),
@@ -79,79 +72,81 @@ class RoleSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Create Your Account',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16.0),
-            const Text(
-              'Welcome!',
-              style: TextStyle(
-                fontSize: 28.0,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Card(
+              color: const Color(
+                0xFFFAFAFA,
+              ), // Slightly lighter off-white for card
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-            const SizedBox(height: 8.0),
-            const Text(
-              'Choose your role to continue',
-              style: TextStyle(fontSize: 16.0, color: Colors.grey),
-            ),
-            const SizedBox(height: 32.0),
-            Expanded(
-              child: Column(
-                children: [
-                  _buildRoleButton(
-                    'Passenger',
-                    'Browse routes and request trips',
-                    () => _onRoleSelected('passenger'),
-                  ),
-                  const SizedBox(height: 20.0),
-                  _buildRoleButton(
-                    'Driver',
-                    'Accept trips and manage availability',
-                    () => _onRoleSelected('driver'),
-                  ),
-                  const Spacer(),
-                  Column(
-                    children: [
-                      const Text(
-                        'Already have an account?',
-                        style: TextStyle(fontSize: 14.0, color: Colors.grey),
+              elevation: 6,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 30,
+                  horizontal: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Create Your Account",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
-                      TextButton(
-                        onPressed: _onSignInTap,
-                        child: const Text(
-                          'Sign in',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Choose your role to continue",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildRoleButton(
+                      'Passenger',
+                      'Browse routes and request trips',
+                      Icons.person_outline,
+                      () => _onRoleSelected('passenger'),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRoleButton(
+                      'Driver',
+                      'Accept trips and manage availability',
+                      Icons.drive_eta,
+                      () => _onRoleSelected('driver'),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      "Already have an account?",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PhoneNumberScreen(),
                           ),
+                        );
+                      },
+                      child: const Text(
+                        "Sign in",
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

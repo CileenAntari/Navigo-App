@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'role.dart';
+import '../authentication/PhoneNumberScreen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -88,7 +89,12 @@ class OnboardingScreen extends StatelessWidget {
 
           /// Sign In Button
           TextButton(
-            onPressed: _onSignInTap,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PhoneNumberScreen()),
+              );
+            },
             child: const Text(
               'Sign in',
               style: TextStyle(
