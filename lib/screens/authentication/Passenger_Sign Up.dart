@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'OtpVerificationScreen.dart';
 
 class PassengerSignupScreen extends StatefulWidget {
   const PassengerSignupScreen({Key? key}) : super(key: key);
@@ -50,7 +52,7 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                   const CircleAvatar(
                     radius: 18,
                     backgroundImage:
-                        AssetImage('assets/avatar.png'),
+                        AssetImage('assets/images/logo.png'),
                   ),
                 ],
               ),
@@ -240,23 +242,76 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
     );
   }
 
-  void _submit() {
-    final name = _nameController.text.trim();
-    final phone = _phoneController.text.trim();
+ 
+  void _submit() async {
+  final name = _nameController.text.trim();
+  final phone = _phoneController.text.trim();
 
-    if (name.isEmpty || phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all fields"),
-        ),
-      );
-      return;
-    }
-
-    print("Name: $name");
-    print("Phone: $phone");
+  if (name.isEmpty || phone.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please fill all fields")),
+    );
+    return;
   }
 
+  if (!_agreeToTerms) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("You must agree to the terms")),
+    );
+    return;
+  }
+
+  final formattedPhone = _formatPhoneNumber(phone);
+
+  await FirebaseAuth.instance.verifyPhoneNumber(
+    phoneNumber: formattedPhone,
+    timeout: const Duration(seconds: 60),
+
+    verificationCompleted: (PhoneAuthCredential credential) async {
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    },
+
+    verificationFailed: (FirebaseAuthException e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.message}")),
+      );
+    },
+
+    codeSent: (String verificationId, int? resendToken) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OtpVerificationScreen(
+            phoneNumber: formattedPhone,
+            verificationId: verificationId,
+          ),
+        ),
+      );
+    },
+
+    codeAutoRetrievalTimeout: (String verificationId) {},
+  );
+}
+}
+String _formatPhoneNumber(String phone) {
+  String cleaned = phone.replaceAll(RegExp(r'\s+'), '');
+
+  // Already in international format
+  if (cleaned.startsWith('+')) return cleaned;
+
+  // Local Palestinian number (starts with 0)
+  if (cleaned.startsWith('0')) {
+    return '+970${cleaned.substring(1)}';
+  }
+
+  // If user entered without 0 (e.g. 59xxxxxxx)
+  if (cleaned.startsWith('5')) {
+    return '+970$cleaned';
+  }
+
+  // fallback
+  return cleaned;
+}
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
@@ -280,4 +335,3 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
       ),
     );
   }
-}

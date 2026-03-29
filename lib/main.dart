@@ -1,11 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import '../../firebase_options.dart';
-import 'welcome.dart';
+import 'firebase_options.dart';
+import 'screens/welcome_flow/welcome.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase only once (avoids [core/duplicate-app] on some setups).
+  /*if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    
+  }*/
+await Firebase.initializeApp(
+    demoProjectId: "demo-Navigo",
+  );
   runApp(const MyApp());
 }
 
@@ -14,14 +25,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: SplashScreen(),
     );
   }
 }
 
-/// Splash Screen
+/// ✅ Splash Screen (NO Firebase here)
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,6 +41,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -37,18 +49,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> startApp() async {
-    // wait 5 seconds
+    // wait 3 seconds
     await Future.delayed(const Duration(seconds: 3));
 
-    // initialize firebase
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    // ✅ Debug (optional)
+    print("Navigating to onboarding...");
 
-    // navigate
+    if (!mounted) return;
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      MaterialPageRoute(
+        builder: (context) => const OnboardingScreen(),
+      ),
     );
   }
 
@@ -60,17 +73,19 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            Image(image: AssetImage("images/logo.png"), width: 220),
-
+            Image(
+              image: AssetImage("assets/images/logo.png"),
+              width: 220,
+            ),
             SizedBox(height: 20),
-
             Text(
               "Navigo-وصلني",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-
             SizedBox(height: 8),
-
             Text(
               "Smart Transportation Platform",
               style: TextStyle(color: Colors.black54),
