@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import '../authentication/PhoneNumberScreen.dart';
 
 // 👇 Import your signup screens
@@ -6,23 +7,19 @@ import '../authentication/Passenger_Sign Up.dart';
 import '../authentication/Driver_Signup.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
+  const RoleSelectionScreen({super.key});
 
   // ✅ Handle role selection + navigation
   void _onRoleSelected(BuildContext context, String role) {
     if (role == 'passenger') {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const PassengerSignupScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const PassengerSignupScreen()),
       );
     } else if (role == 'driver') {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const DriverSignupScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const DriverSignupScreen()),
       );
     }
   }
@@ -38,14 +35,7 @@ class RoleSelectionScreen extends StatelessWidget {
       width: double.infinity,
       child: OutlinedButton(
         onPressed: () => _onRoleSelected(context, role),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.orange, width: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-          backgroundColor: Colors.white,
-        ),
+        style: NavigoDecorations.kRoleButtonStyle,
         child: Row(
           children: [
             Container(
@@ -71,13 +61,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                  ),
+                  Text(description, style: NavigoTextStyles.bodyMedium),
                 ],
               ),
             ),
@@ -90,17 +74,12 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Card(
-              color: const Color(0xFFFAFAFA),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              elevation: 6,
+            child: Container(
+              decoration: NavigoDecorations.kLightCardDecoration,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 30,
@@ -111,16 +90,13 @@ class RoleSelectionScreen extends StatelessWidget {
                   children: [
                     const Text(
                       "Create Your Account",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: NavigoTextStyles.titleLarge,
                     ),
                     const SizedBox(height: 10),
                     const Text(
                       "Choose your role to continue",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: NavigoTextStyles.bodySmall,
                     ),
                     const SizedBox(height: 24),
 
@@ -148,7 +124,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
                     const Text(
                       "Already have an account?",
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: NavigoTextStyles.bodySmall,
                     ),
 
                     TextButton(
@@ -156,18 +132,13 @@ class RoleSelectionScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const PhoneNumberScreen(),
+                            builder: (context) => const PhoneNumberScreen(),
                           ),
                         );
                       },
                       child: const Text(
                         "Sign in",
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                        style: NavigoTextStyles.buttonOrangeLink,
                       ),
                     ),
                   ],

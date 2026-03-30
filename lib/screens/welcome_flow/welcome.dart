@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import 'role.dart';
 import '../authentication/PhoneNumberScreen.dart';
 
@@ -8,7 +9,6 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 243, 244, 246),
       body: SafeArea(
         child: Column(
           children: [
@@ -51,14 +51,10 @@ class OnboardingScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Browse routes, track vehicles, and request trips.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.0,
-              height: 1.4,
-              color: Color(0xFF1F2937),
-            ),
+            style: NavigoTextStyles.bodySmall.copyWith(height: 1.4),
           ),
 
           const SizedBox(height: 28),
@@ -70,16 +66,19 @@ class OnboardingScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               icon: const Icon(Icons.arrow_right_alt),
               label: const Text('Get Started'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF59E0B),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+              style: NavigoDecorations.kAmberButtonStyle.copyWith(
+                textStyle: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.pressed)) {
+                    return const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    );
+                  }
+                  return const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  );
+                }),
               ),
               onPressed: () => _onGetStartedPressed(context),
             ),
@@ -97,11 +96,7 @@ class OnboardingScreen extends StatelessWidget {
             },
             child: const Text(
               'Sign in',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w700,
-                fontStyle: FontStyle.italic,
-              ),
+              style: NavigoTextStyles.buttonOrangeLink,
             ),
           ),
         ],

@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // ================== Passenger Signup Screen ==================
 class PassengerSignupScreen extends StatefulWidget {
-  const PassengerSignupScreen({Key? key}) : super(key: key);
+  const PassengerSignupScreen({super.key});
 
   @override
   State<PassengerSignupScreen> createState() => _PassengerSignupScreenState();
@@ -30,7 +30,7 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar
+            /// Top Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
@@ -54,152 +54,153 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            // Card
+            /// Centered Body
             Expanded(
               child: Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Passenger details",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 450),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Name
-                      const Text(
-                        "Full name",
-                        style: TextStyle(fontSize: 13, color: Colors.black54),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _nameController,
-                        hint: "e.g., Cileen antari",
-                        keyboardType: TextInputType.name,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Phone
-                      const Text(
-                        "Phone number",
-                        style: TextStyle(fontSize: 13, color: Colors.black54),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _phoneController,
-                        hint: "059 000 0000",
-                        keyboardType: TextInputType.phone,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Terms + Button together
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Checkbox(
-                                value: _agreeToTerms,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _agreeToTerms = value ?? false;
-                                  });
-                                },
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                        fontSize: 13, color: Colors.black),
-                                    children: [
-                                      const TextSpan(text: "I agree to "),
-                                      TextSpan(
-                                        text: "Terms",
-                                        style: const TextStyle(
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {},
-                                      ),
-                                      const TextSpan(text: " & "),
-                                      TextSpan(
-                                        text: "Privacy",
-                                        style: const TextStyle(
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {},
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Button directly under checkbox
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: ElevatedButton(
-                              onPressed: _agreeToTerms ? _submit : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF9800),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text(
-                                    "Create Account",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Icon(Icons.arrow_forward),
-                                ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              "Passenger details",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        ],
+
+                            const SizedBox(height: 20),
+
+                            /// Name
+                            const Text(
+                              "Full name",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            _buildTextField(
+                              controller: _nameController,
+                              hint: "e.g., Cileen antari",
+                              keyboardType: TextInputType.name,
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            /// Phone
+                            const Text(
+                              "Phone number",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            _buildTextField(
+                              controller: _phoneController,
+                              hint: "059 000 0000",
+                              keyboardType: TextInputType.phone,
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            /// Terms
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _agreeToTerms,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _agreeToTerms = value ?? false;
+                                    });
+                                  },
+                                ),
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black,
+                                      ),
+                                      children: [
+                                        const TextSpan(text: "I agree to "),
+                                        TextSpan(
+                                          text: "Terms",
+                                          style: const TextStyle(
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                        const TextSpan(text: " & "),
+                                        TextSpan(
+                                          text: "Privacy",
+                                          style: const TextStyle(
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            /// Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 55,
+                              child: ElevatedButton(
+                                onPressed: _agreeToTerms ? _submit : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFF9800),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Text(
+                                      "Create Account",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Icon(Icons.arrow_forward),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -220,8 +221,10 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         filled: true,
         fillColor: const Color(0xFFF7F7F7),
         border: OutlineInputBorder(
@@ -237,9 +240,9 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
     final phone = _phoneController.text.trim();
 
     if (name.isEmpty || phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
 
@@ -260,9 +263,9 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
           await FirebaseAuth.instance.signInWithCredential(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error: ${e.message}")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
         },
         codeSent: (String verificationId, int? resendToken) {
           Navigator.push(
@@ -278,9 +281,9 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
         codeAutoRetrievalTimeout: (String verificationId) {},
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Firebase error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Firebase error: $e")));
     }
   }
 
@@ -310,8 +313,10 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final List<TextEditingController> _otpControllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
 
   @override
   void dispose() {
@@ -342,9 +347,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
       // Navigate to next screen (home/dashboard)
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Invalid OTP: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Invalid OTP: $e")));
     }
   }
 
@@ -394,15 +399,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               elevation: 4,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 30,
+                  horizontal: 20,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
                       "Verify phone number",
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -413,8 +422,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children:
-                          List.generate(6, (index) => _buildOtpTextField(index)),
+                      children: List.generate(
+                        6,
+                        (index) => _buildOtpTextField(index),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -426,8 +437,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           child: const Text(
                             "Resend Code",
                             style: TextStyle(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold),
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -447,7 +459,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         child: const Text(
                           "Continue",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -462,7 +476,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       child: const Text(
                         "Change phone number",
                         style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold),
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

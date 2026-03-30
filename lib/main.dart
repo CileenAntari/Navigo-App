@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'screens/welcome_flow/welcome.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +14,7 @@ Future<void> main() async {
     );
     
   }*/
-await Firebase.initializeApp(
-    demoProjectId: "demo-Navigo",
-  );
+  await Firebase.initializeApp(demoProjectId: "demo-Navigo");
   runApp(const MyApp());
 }
 
@@ -25,9 +23,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: appTheme,
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -41,7 +40,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -59,38 +57,43 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const OnboardingScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 245, 206, 143),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Image(
-              image: AssetImage("assets/images/logo.png"),
-              width: 220,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [NavigoColors.primaryAmber, NavigoColors.backgroundLight],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(
+                  image: const AssetImage("assets/images/logo.png"),
+                  width: 220,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Navigo-وصلني",
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Smart Transportation Platform",
+                  style: NavigoTextStyles.bodyMedium,
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            Text(
-              "Navigo-وصلني",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Smart Transportation Platform",
-              style: TextStyle(color: Colors.black54),
-            ),
-          ],
+          ),
         ),
       ),
     );
