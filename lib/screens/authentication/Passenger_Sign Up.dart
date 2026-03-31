@@ -54,15 +54,17 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
       codeSent: (String verificationId, int? resendToken) {
         if (!mounted) return;
         setState(() => _isLoading = false);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(
-              phoneNumber: formattedPhone,
-              verificationId: verificationId,
-            ),
-          ),
-        );
+       Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => OtpVerificationScreen(
+      phoneNumber: formattedPhone,
+      verificationId: verificationId,
+      fullName: name,
+      role: "passenger",
+    ),
+  ),
+);
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         if (!mounted) return;
@@ -71,13 +73,26 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
     );
   }
 
-  String _formatPhoneNumber(String phone) {
-    String cleaned = phone.replaceAll(RegExp(r'\s+'), '');
-    if (cleaned.startsWith('+')) return cleaned;
-    if (cleaned.startsWith('0')) return '+970${cleaned.substring(1)}';
-    if (cleaned.startsWith('5')) return '+970$cleaned';
+ String _formatPhoneNumber(String phone) {
+  String cleaned = phone.replaceAll(RegExp(r'\s+'), '');
+
+  // ✅ Already international
+  if (cleaned.startsWith('+970') || cleaned.startsWith('+972')) {
     return cleaned;
   }
+
+  // ✅ Local Palestinian format
+  if (cleaned.startsWith('0')) {
+    return '+970${cleaned.substring(1)}';
+  }
+
+  // ✅ Starts with 5 (e.g. 59xxxxxxx)
+  if (cleaned.startsWith('5')) {
+    return '+970$cleaned';
+  }
+
+  return cleaned;
+}
 
   @override
   Widget build(BuildContext context) {

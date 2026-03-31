@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../theme/app_theme.dart';
 import '../passenger/PassengerBottomNavBar.dart';
@@ -15,17 +17,37 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nameController = TextEditingController(
-    text: "Lara Shaltaf",
-  );
-  final TextEditingController _phoneController = TextEditingController(
-    text: "+970591234567",
-  );
-
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _image;
-
   bool _isEditing = false;
+
+  User? currentUser;
+  late DocumentReference userDocRef;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      userDocRef = FirebaseFirestore.instance.collection('users').doc(currentUser!.uid);
+      _loadUserData();
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      DocumentSnapshot snapshot = await userDocRef.get();
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        _nameController.text = "${data['firstName'] ?? ''} ${data['lastName'] ?? ''}";
+        _phoneController.text = data['phone'] ?? '';
+      }
+    } catch (e) {
+      debugPrint("Error loading user data: $e");
+    }
+  }
 
   void _toggleEdit() {
     setState(() => _isEditing = !_isEditing);
@@ -33,11 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source);
-
     if (picked != null) {
-      setState(() {
-        _image = File(picked.path);
-      });
+      setState(() => _image = File(picked.path));
     }
   }
 
@@ -71,23 +90,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _logout() {
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
+    if (currentUser == null) return;
+
     setState(() => _isEditing = false);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Profile updated")));
+    // Split first and last name
+    List<String> names = _nameController.text.trim().split(" ");
+    String firstName = names.isNotEmpty ? names[0] : "";
+    String lastName = names.length > 1 ? names.sublist(1).join(" ") : "";
+
+    try {
+      await userDocRef.update({
+        "firstName": firstName,
+        "lastName": lastName,
+        "phone": _phoneController.text.trim(),
+        // If you implement image upload, include a field "image": downloadUrl
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile updated")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update profile: $e")),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: const PassengerBottomNavBar(currentIndex: 3),
-
       body: SafeArea(
         child: Column(
           children: [
@@ -134,9 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             backgroundImage: _image != null
                                 ? FileImage(_image!)
                                 : const AssetImage("assets/images/logo.png")
-                                      as ImageProvider,
+                                    as ImageProvider,
                           ),
-
                           if (_isEditing)
                             Positioned(
                               bottom: 0,
@@ -253,13 +291,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         TextField(
           controller: controller,
           enabled: enabled,
-
-          // ✅ Make text black
           style: const TextStyle(
             color: NavigoColors.textDark,
             fontWeight: FontWeight.w500,
           ),
-
           decoration: NavigoDecorations.kInputDecoration.copyWith(
             prefixIcon: Icon(icon, color: NavigoColors.primaryOrange),
           ),

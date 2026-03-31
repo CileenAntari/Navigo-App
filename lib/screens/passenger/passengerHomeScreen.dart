@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../theme/app_theme.dart';
 import 'schedulescreen.dart';
@@ -25,10 +27,16 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
   final List<String> _lines = ['Birzeit <-----> Ramallah'];
   List<String> _filteredLines = [];
 
+  // ✅ USER DATA
+  String _userName = "Loading...";
+
   @override
   void initState() {
     super.initState();
     _filteredLines = List.from(_lines);
+
+    _loadUserData(); // ✅ load user
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getUserLocation();
     });
@@ -39,6 +47,35 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
     _searchController.dispose();
     _mapController?.dispose();
     super.dispose();
+  }
+
+  // ================= USER DATA =================
+  Future<void> _loadUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        setState(() => _userName = "Guest");
+        return;
+      }
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          _userName =
+              "${doc['firstName'] ?? ''} ${doc['lastName'] ?? ''}".trim();
+        });
+      } else {
+        setState(() => _userName = "Guest");
+      }
+    } catch (e) {
+      debugPrint("User load error: $e");
+      setState(() => _userName = "Guest");
+    }
   }
 
   // ================= LOCATION =================
@@ -58,16 +95,16 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
         return;
       }
 
-      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled =
+          await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return;
 
-      Position position =
-          await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-          ).timeout(
-            const Duration(seconds: 10),
-            onTimeout: () => throw Exception("Location timeout"),
-          );
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception("Location timeout"),
+      );
 
       if (!mounted) return;
 
@@ -102,14 +139,15 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
 
   void _confirmRide() {
     if (_selectedLine == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please select a line")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a line")),
+      );
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Ride Confirmed 🚀")));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Ride Confirmed 🚀")),
+    );
   }
 
   // ================= BUILD =================
@@ -138,17 +176,17 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // ── HEADER: Title + Logo ──────────────────
+                  // ── HEADER ───────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center, // ← add this
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // ← add this
                         children: [
-                          Text("Navigo", style: NavigoTextStyles.titleLarge),
+                          Text(
+                            "Hello, $_userName 👋", // ✅ dynamic name
+                            style: NavigoTextStyles.titleLarge,
+                          ),
                           Text(
                             "Where would you like to go?",
                             style: NavigoTextStyles.bodySmall,
@@ -175,9 +213,8 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
 
                   const SizedBox(height: 14),
 
-                  // ── SEARCH BAR + LOCATION BUTTON ──────────
+                  // ── SEARCH + LOCATION ─────────────────────
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Column(
@@ -185,31 +222,20 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                             TextField(
                               controller: _searchController,
                               style: const TextStyle(color: Colors.black),
-                              decoration: NavigoDecorations.kInputDecoration
-                                  .copyWith(
-                                    hintText: "Search or select a line",
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    prefixIcon: const Icon(
-                                      Icons.search,
-                                      color: NavigoColors.primaryOrange,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                      borderSide: const BorderSide(
-                                        color: NavigoColors.primaryOrange,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
+                              decoration:
+                                  NavigoDecorations.kInputDecoration.copyWith(
+                                hintText: "Search or select a line",
+                                filled: true,
+                                fillColor: Colors.white,
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: NavigoColors.primaryOrange,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                               onChanged: _filterLines,
                             ),
 
@@ -217,41 +243,22 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                 _searchController.text.isNotEmpty)
                               Container(
                                 margin: const EdgeInsets.only(top: 6),
-                                constraints: const BoxConstraints(
-                                  maxHeight: 150,
-                                ),
+                                constraints:
+                                    const BoxConstraints(maxHeight: 150),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: NavigoColors.lightorange,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                  border: Border.all(
-                                    color: NavigoColors.primaryOrange
-                                        .withOpacity(0.4),
-                                  ),
                                 ),
                                 child: ListView.builder(
                                   shrinkWrap: true,
                                   itemCount: _filteredLines.length,
                                   itemBuilder: (context, index) {
                                     return ListTile(
-                                      leading: const Icon(
-                                        Icons.directions_bus,
-                                        color: NavigoColors.primaryOrange,
-                                        size: 20,
-                                      ),
-                                      title: Text(
-                                        _filteredLines[index],
-                                        style: NavigoTextStyles.bodyMedium,
-                                      ),
+                                      title: Text(_filteredLines[index]),
                                       onTap: () {
                                         setState(() {
-                                          _selectedLine = _filteredLines[index];
+                                          _selectedLine =
+                                              _filteredLines[index];
                                           _searchController.text =
                                               _selectedLine!;
                                           _filteredLines = [];
@@ -268,43 +275,13 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       const SizedBox(width: 10),
 
                       _isLocating
-                          ? Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                color: NavigoColors.primaryOrange,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(10),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              ),
-                            )
+                          ? const CircularProgressIndicator()
                           : FloatingActionButton.small(
-                              backgroundColor: NavigoColors.primaryOrange,
-                              foregroundColor: Colors.white,
-                              elevation: 2,
+                              backgroundColor:
+                                  NavigoColors.primaryOrange,
                               onPressed: _getUserLocation,
                               child: const Icon(Icons.my_location),
                             ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildChip(label: "Now", selected: true),
-                      const SizedBox(width: 10),
-                      _buildChip(
-                        label: "Schedule",
-                        selected: false,
-                        onTap: _openSchedule,
-                      ),
                     ],
                   ),
                 ],
@@ -319,106 +296,27 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
             right: 0,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: NavigoColors.lightorange,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(25),
-                ),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black26, blurRadius: 16),
-                ],
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
+                  Text("Line: ${_selectedLine ?? 'Not selected'}"),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
 
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.directions_bus,
-                        color: NavigoColors.primaryOrange,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Line: ${_selectedLine ?? 'Not selected'}",
-                        style: NavigoTextStyles.bodyMedium.copyWith(
-                          color: NavigoColors.textGray,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _confirmRide,
-                      style: NavigoDecorations.kPrimaryButtonLargeStyle,
-                      child: const Text(
-                        "Confirm Ride",
-                        style: NavigoTextStyles.button,
-                      ),
-                    ),
+                  ElevatedButton(
+                    onPressed: _confirmRide,
+                    child: const Text("Confirm Ride"),
                   ),
                 ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool selected,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? NavigoColors.primaryOrange : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: NavigoColors.primaryOrange, width: 1.5),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: NavigoColors.primaryOrange.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [],
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : NavigoColors.primaryOrange,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
       ),
     );
   }

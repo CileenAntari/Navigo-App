@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_flow/welcome.dart';
 import 'theme/app_theme.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase only once (avoids [core/duplicate-app] on some setups).
-  /*if (Firebase.apps.isEmpty) { 
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    
-  }*/
-  await Firebase.initializeApp(demoProjectId: "demo-Navigo");
+  // Initialize Firebase in the background
+  Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ).then((_) {
+    print("Firebase initialized successfully");
+  }).catchError((e) {
+    print("Firebase initialization failed: $e");
+  });
+
+  // Run the app immediately
   runApp(const MyApp());
 }
 
@@ -46,14 +49,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> startApp() async {
-    // wait 3 seconds
+    // Show splash for 3 seconds
     await Future.delayed(const Duration(seconds: 3));
 
-    // ✅ Debug (optional)
-    print("Navigating to onboarding...");
-
+    // Ensure the widget is still mounted
     if (!mounted) return;
 
+    // Navigate to OnboardingScreen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -76,8 +78,8 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image(
-                  image: const AssetImage("assets/images/logo.png"),
+                Image.asset(
+                  "assets/images/logo.png",
                   width: 220,
                 ),
                 const SizedBox(height: 20),

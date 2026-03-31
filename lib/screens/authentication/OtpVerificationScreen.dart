@@ -1,262 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../passenger/passengerHomeScreen.dart';
 
-// ================== Passenger Signup Screen ==================
-class PassengerSignupScreen extends StatefulWidget {
-  const PassengerSignupScreen({super.key});
-
-  @override
-  State<PassengerSignupScreen> createState() => _PassengerSignupScreenState();
-}
-
-class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
-  bool _agreeToTerms = false;
-
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: NavigoColors.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Top Bar ──────────────────────────────────────
-            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
-
-            // ── Body ─────────────────────────────────────────
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 450),
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: NavigoDecorations.kCardDecoration,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Title
-                            const Text(
-                              "Passenger details",
-                              style: NavigoTextStyles.titleSmall,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Full name label
-                            const Text(
-                              "Full name",
-                              style: NavigoTextStyles.label,
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _nameController,
-                              keyboardType: TextInputType.name,
-                              style: const TextStyle(
-                                color: NavigoColors.textDark,
-                                fontSize: 15,
-                              ),
-                              decoration: NavigoDecorations.kInputDecoration
-                                  .copyWith(hintText: "e.g., Cileen Antari"),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Phone label
-                            const Text(
-                              "Phone number",
-                              style: NavigoTextStyles.label,
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              style: const TextStyle(
-                                color: NavigoColors.textDark,
-                                fontSize: 15,
-                              ),
-                              decoration: NavigoDecorations.kInputDecoration
-                                  .copyWith(hintText: "059 000 0000"),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Terms checkbox
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: _agreeToTerms,
-                                  activeColor: NavigoColors.primaryOrange,
-                                  onChanged: (value) => setState(
-                                    () => _agreeToTerms = value ?? false,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: RichText(
-                                    text: const TextSpan(
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: NavigoColors.textDark,
-                                      ),
-                                      children: [
-                                        TextSpan(text: "I agree to "),
-                                        TextSpan(
-                                          text: "Terms",
-                                          style: TextStyle(
-                                            color: NavigoColors.primaryOrange,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(text: " & "),
-                                        TextSpan(
-                                          text: "Privacy",
-                                          style: TextStyle(
-                                            color: NavigoColors.primaryOrange,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Create Account button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 55,
-                              child: ElevatedButton(
-                                onPressed: _agreeToTerms ? _submit : null,
-                                style:
-                                    NavigoDecorations.kPrimaryButtonLargeStyle,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Text(
-                                      "Create Account",
-                                      style: NavigoTextStyles.button,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _submit() async {
-    final name = _nameController.text.trim();
-    final phone = _phoneController.text.trim();
-
-    if (name.isEmpty || phone.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
-      return;
-    }
-
-    if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You must agree to the terms")),
-      );
-      return;
-    }
-
-    final formattedPhone = _formatPhoneNumber(phone);
-
-    try {
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: formattedPhone,
-        timeout: const Duration(seconds: 60),
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await FirebaseAuth.instance.signInWithCredential(credential);
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => OtpVerificationScreen(
-                phoneNumber: formattedPhone,
-                verificationId: verificationId,
-              ),
-            ),
-          );
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {},
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Firebase error: $e")));
-    }
-  }
-
-  String _formatPhoneNumber(String phone) {
-    String cleaned = phone.replaceAll(RegExp(r'\s+'), '');
-    if (cleaned.startsWith('+')) return cleaned;
-    if (cleaned.startsWith('0')) return '+970${cleaned.substring(1)}';
-    if (cleaned.startsWith('5')) return '+970$cleaned';
-    return cleaned;
-  }
-}
-
-// ================== OTP Verification Screen ==================
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
 
+ final String? fullName;
+final String? role;
+
   const OtpVerificationScreen({
-    super.key,
-    required this.phoneNumber,
-    required this.verificationId,
-  });
+  super.key,
+  required this.phoneNumber,
+  required this.verificationId,
+  this.fullName,
+  this.role,
+});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final List<TextEditingController> _otpControllers = List.generate(
-    6,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final List<TextEditingController> _otpControllers =
+      List.generate(6, (_) => TextEditingController());
+
+  final List<FocusNode> _focusNodes =
+      List.generate(6, (_) => FocusNode());
 
   @override
   void dispose() {
@@ -270,31 +42,78 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _onContinue() async {
-    String otp = _otpControllers.map((e) => e.text).join();
+  String otp = _otpControllers.map((e) => e.text).join();
 
-    if (otp.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter a valid 6-digit OTP")),
-      );
-      return;
-    }
-
-    try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: widget.verificationId,
-        smsCode: otp,
-      );
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      // Navigate to home/dashboard
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Invalid OTP: $e")));
-    }
+  if (otp.length != 6) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Enter a valid 6-digit OTP")),
+    );
+    return;
   }
 
+  try {
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: widget.verificationId,
+      smsCode: otp,
+    );
+
+    // ✅ Sign in
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+    String uid = userCredential.user!.uid;
+
+    // ✅ Split name safely
+    String firstName = "";
+    String lastName = "";
+    if (widget.fullName != null && widget.fullName!.isNotEmpty) {
+      List<String> names = widget.fullName!.split(" ");
+      firstName = names.isNotEmpty ? names[0] : "";
+      lastName = names.length > 1 ? names[1] : "";
+    }
+
+    // ✅ Save user (merge avoids overwriting existing fields)
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .set({
+          "userId": uid,
+          "firstName": firstName,
+          "lastName": lastName,
+          "phone": widget.phoneNumber,
+          "image": null,
+          "role": widget.role ?? "passenger",
+          "isVerified": true,
+        },SetOptions(merge: true));
+
+    // ✅ Passenger-specific data
+    if (widget.role == "passenger") {
+      await FirebaseFirestore.instance
+          .collection('passengers')
+          .doc(uid)
+          .set({
+        "tripHistory": [],
+        "paymentMethods": [],
+      }, SetOptions(merge: true));
+    }
+
+    // ✅ Navigate
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PassengerHomeScreen(),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Invalid OTP: $e")),
+    );
+  }
+}
   void _resendCode() {
-    // TODO: Resend OTP with Firebase
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Resend not implemented yet")),
+    );
   }
 
   Widget _buildOtpTextField(int index) {
@@ -307,7 +126,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
-        // ✅ Explicit black color so digits are always visible
         style: const TextStyle(
           color: Colors.black,
           fontSize: 16,
@@ -354,10 +172,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top Bar ──────────────────────────────────────
             NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
 
-            // ── Body ─────────────────────────────────────────
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -373,24 +189,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Title
                           const Text(
                             "Verify phone number",
                             style: NavigoTextStyles.titleLarge,
                           ),
-
                           const SizedBox(height: 10),
-
-                          // Subtitle
                           Text(
                             "Enter the 6-digit code sent to ${widget.phoneNumber}",
                             textAlign: TextAlign.center,
                             style: NavigoTextStyles.bodySmall,
                           ),
-
                           const SizedBox(height: 28),
 
-                          // OTP fields
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(
@@ -401,7 +211,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                           const SizedBox(height: 20),
 
-                          // Resend row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -421,20 +230,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                           const SizedBox(height: 24),
 
-                          // Continue button
                           SizedBox(
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
                               onPressed: _onContinue,
-                              style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                              style:
+                                  NavigoDecorations.kPrimaryButtonLargeStyle,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Text(
-                                    "Continue",
-                                    style: NavigoTextStyles.button,
-                                  ),
+                                  Text("Continue",
+                                      style: NavigoTextStyles.button),
                                   SizedBox(width: 10),
                                   Icon(Icons.arrow_forward),
                                 ],
@@ -444,7 +251,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                           const SizedBox(height: 12),
 
-                          // note
                           const Text(
                             "note: OTP expires in 2 minutes.",
                             style: NavigoTextStyles.bodySmall,
@@ -452,7 +258,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                           const SizedBox(height: 12),
 
-                          // Change phone
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: const Text(
