@@ -52,7 +52,9 @@ class _PassengerHomeScreenState
 
       if (permission == LocationPermission.denied ||
           permission ==
-              LocationPermission.deniedForever) return;
+              LocationPermission.deniedForever) {
+        return;
+      }
 
       Position position =
           await Geolocator.getCurrentPosition(

@@ -8,9 +8,9 @@ class PassengerBottomNavBar extends StatelessWidget {
   final int currentIndex;
 
   const PassengerBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
-  }) : super(key: key);
+  });
 
   void _onItemTapped(BuildContext context, int index) {
   if (index == currentIndex) return;

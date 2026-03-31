@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:navigo/screens/passenger/ProfileScreen.dart';
 import '../../theme/app_theme.dart';
 import 'role.dart';
 import '../authentication/PhoneNumberScreen.dart';
