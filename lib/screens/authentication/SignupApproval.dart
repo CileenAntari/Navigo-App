@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:navigo/screens/authentication/PhoneNumberScreen.dart';
+import '../../theme/app_theme.dart';
+import 'PhoneNumberScreen.dart';
 
 class SignupApprovalScreen extends StatelessWidget {
   const SignupApprovalScreen({super.key});
@@ -7,24 +8,14 @@ class SignupApprovalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: NavigoColors.backgroundLight,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
+              decoration: NavigoDecorations.kCardDecoration,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -32,13 +23,17 @@ class SignupApprovalScreen extends StatelessWidget {
                   Container(
                     width: 80,
                     height: 80,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8F5E9),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: NavigoColors.accentGreen,
+                        width: 2,
+                      ),
                     ),
                     child: const Icon(
                       Icons.check,
-                      color: Colors.green,
+                      color: NavigoColors.accentGreen,
                       size: 40,
                     ),
                   ),
@@ -46,18 +41,15 @@ class SignupApprovalScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Title
-                  const Text(
-                    "Request received",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  Text("Request received", style: NavigoTextStyles.titleMedium),
 
                   const SizedBox(height: 10),
 
                   // Subtitle
-                  const Text(
-                    "Your account is pending approval.\nWe’ll notify you once it’s verified.",
+                  Text(
+                    "Your account is pending approval.\nWe'll notify you once it's verified.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                    style: NavigoTextStyles.bodySmall,
                   ),
 
                   const SizedBox(height: 30),
@@ -75,25 +67,16 @@ class SignupApprovalScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF9800),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 0,
-                      ),
+                      style: NavigoDecorations.kPrimaryButtonLargeStyle,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Text(
                             "Back to Sign in",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: NavigoTextStyles.button,
                           ),
-                          SizedBox(width: 10),
-                          Icon(Icons.arrow_forward),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.arrow_forward),
                         ],
                       ),
                     ),

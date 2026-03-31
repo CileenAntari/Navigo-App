@@ -106,7 +106,7 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                         children: [
                           const Text(
                             "Passenger details",
-                            style: NavigoTextStyles.titleMedium,
+                            style: NavigoTextStyles.titleLarge,
                           ),
                           const SizedBox(height: 8),
                           const Text(
@@ -116,21 +116,55 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                           const SizedBox(height: 20),
 
                           /// Name Field
+                          const Text(
+                            "Full name",
+                            style: NavigoTextStyles.label,
+                          ),
+                          const SizedBox(height: 8),
                           TextField(
                             controller: _nameController,
                             keyboardType: TextInputType.name,
+                            // ← Forces black text in the name field
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: NavigoDecorations.kInputDecoration
-                                .copyWith(hintText: "e.g. Cileen Antari"),
+                                .copyWith(
+                                  hintText: "e.g. Cileen Antari",
+                                  prefixIcon: const Icon(
+                                    Icons.person_outline,
+                                    color: Colors.green,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () => _nameController.clear(),
+                                  ),
+                                ),
                           ),
                           const SizedBox(height: 16),
 
                           /// Phone Field
+                          const Text(
+                            "Phone number",
+                            style: NavigoTextStyles.label,
+                          ),
+                          const SizedBox(height: 8),
                           TextField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
+                            // ← Forces black text in the phone field
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: NavigoDecorations.kInputDecoration
                                 .copyWith(
-                                  hintText: "059 000 0000",
+                                  hintText: "+97059 000 0000",
+                                  prefixIcon: const Icon(
+                                    Icons.phone_outlined,
+                                    color: Colors.green,
+                                  ),
                                   suffixIcon: IconButton(
                                     icon: const Icon(Icons.clear),
                                     onPressed: () => _phoneController.clear(),

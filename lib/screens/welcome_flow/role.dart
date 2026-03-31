@@ -44,8 +44,9 @@ class RoleSelectionScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
+                //border: Border.all(color: NavigoColors.accentGreen, width: 2),
               ),
-              child: Icon(icon, color: Colors.green, size: 24),
+              child: Icon(icon, color: NavigoColors.accentGreen, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -136,9 +137,11 @@ class RoleSelectionScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         "Sign in",
-                        style: NavigoTextStyles.buttonOrangeLink,
+                        style: NavigoTextStyles.button.copyWith(
+                          color: NavigoColors.accentGreen,
+                        ),
                       ),
                     ),
                   ],

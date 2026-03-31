@@ -81,25 +81,39 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                           children: [
                             const Text(
                               "Enter your phone number",
-                              style: NavigoTextStyles.titleMedium,
+                              style: NavigoTextStyles.titleLarge,
                             ),
 
                             const SizedBox(height: 8),
 
                             const Text(
-                              "We’ll send you a one-time code (OTP) to verify your number.",
+                              "We'll send you a one-time code (OTP) to verify your number.",
                               style: NavigoTextStyles.bodyMedium,
                             ),
 
                             const SizedBox(height: 20),
 
                             /// Phone Field
+                            const Text(
+                              "Phone number",
+                              style: NavigoTextStyles.label,
+                            ),
+                            const SizedBox(height: 8),
                             TextField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
+                              // ← Forces black text in the text field
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                              ),
                               decoration: NavigoDecorations.kInputDecoration
                                   .copyWith(
-                                    hintText: "e.g. 059 000 0000",
+                                    hintText: "e.g. +97059 000 0000",
+                                    prefixIcon: const Icon(
+                                      Icons.phone_outlined,
+                                      color: Colors.green,
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: const Icon(Icons.clear),
                                       onPressed: () => _phoneController.clear(),
@@ -145,9 +159,11 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                                     ),
                                   );
                                 },
-                                child: const Text(
+                                child: Text(
                                   "Sign in with email",
-                                  style: NavigoTextStyles.buttonOrangeLink,
+                                  style: NavigoTextStyles.button.copyWith(
+                                    color: NavigoColors.accentGreen,
+                                  ),
                                 ),
                               ),
                             ),

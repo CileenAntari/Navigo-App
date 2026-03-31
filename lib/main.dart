@@ -8,7 +8,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase only once (avoids [core/duplicate-app] on some setups).
-  /*if (Firebase.apps.isEmpty) {
+  /*if (Firebase.apps.isEmpty) { 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -83,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "Navigo-وصلني",
+                  "Navigo وصلني",
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),

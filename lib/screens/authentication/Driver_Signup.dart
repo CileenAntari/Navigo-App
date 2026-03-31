@@ -68,7 +68,7 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
                           children: [
                             const Text(
                               "Driver details",
-                              style: NavigoTextStyles.titleSmall,
+                              style: NavigoTextStyles.titleLarge,
                             ),
                             const SizedBox(height: 20),
 
@@ -77,6 +77,7 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
                             _inputField(
                               controller: _nameController,
                               hint: "e.g., Ahmad Saleh",
+                              prefixIcon: Icons.person_outline,
                             ),
                             const SizedBox(height: 16),
 
@@ -84,8 +85,9 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
                             _label("Phone number"),
                             _inputField(
                               controller: _phoneController,
-                              hint: "059 000 0000",
+                              hint: "+97059 000 0000",
                               keyboard: TextInputType.phone,
+                              prefixIcon: Icons.phone_outlined,
                             ),
                             const SizedBox(height: 16),
 
@@ -105,6 +107,7 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
                             _inputField(
                               controller: _carNumberController,
                               hint: "e.g., 7-1234",
+                              prefixIcon: Icons.confirmation_number_outlined,
                             ),
                             const SizedBox(height: 16),
 
@@ -175,12 +178,26 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
     required TextEditingController controller,
     required String hint,
     TextInputType keyboard = TextInputType.text,
+    IconData? prefixIcon,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboard,
+      // ← Forces black text in the text field
+      style: const TextStyle(color: Colors.black, fontSize: 16),
       validator: (value) => value == null || value.isEmpty ? "Required" : null,
-      decoration: NavigoDecorations.kInputDecoration.copyWith(hintText: hint),
+      decoration: NavigoDecorations.kInputDecoration.copyWith(
+        hintText: hint,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: Colors.green)
+            : null,
+        suffixIcon: prefixIcon != null
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () => controller.clear(),
+              )
+            : null,
+      ),
     );
   }
 
@@ -192,10 +209,18 @@ class _DriverSignupScreenState extends State<DriverSignupScreen> {
     required Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
-      hint: Text(hint),
+      initialValue: value,
+      // ← Forces black text for the selected value in the dropdown
+      style: const TextStyle(color: Colors.black, fontSize: 16),
+      hint: Text(hint, style: TextStyle(color: Colors.grey)),
       items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              // ← Forces black text for each item in the dropdown list
+              child: Text(e, style: const TextStyle(color: Colors.black)),
+            ),
+          )
           .toList(),
       onChanged: onChanged,
       validator: (value) => value == null ? "Required" : null,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:navigo/screens/passenger/ProfileScreen.dart';
 import '../../theme/app_theme.dart';
 import 'role.dart';
 import '../authentication/PhoneNumberScreen.dart';
+import '../passenger/passengerhomescreen.dart'; // ✅ Add this import
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -63,24 +65,17 @@ class OnboardingScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: 52,
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.arrow_right_alt),
-              label: const Text('Get Started'),
-              style: NavigoDecorations.kAmberButtonStyle.copyWith(
-                textStyle: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.pressed)) {
-                    return const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    );
-                  }
-                  return const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  );
-                }),
-              ),
+            child: ElevatedButton(
+              style: NavigoDecorations.kPrimaryButtonLargeStyle,
               onPressed: () => _onGetStartedPressed(context),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Get Started'),
+                  SizedBox(width: 12),
+                  Icon(Icons.arrow_forward),
+                ],
+              ),
             ),
           ),
 
@@ -94,9 +89,33 @@ class OnboardingScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => PhoneNumberScreen()),
               );
             },
-            child: const Text(
+            child: Text(
               'Sign in',
-              style: NavigoTextStyles.buttonOrangeLink,
+              style: NavigoTextStyles.button.copyWith(
+                color: NavigoColors.accentGreen,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          /// ✨ Continue as Guest
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PassengerHomeScreen(),
+                ),
+              );
+            },
+            child: Text(
+              'Continue as guest',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
         ],

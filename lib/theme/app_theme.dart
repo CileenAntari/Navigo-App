@@ -10,12 +10,14 @@ class NavigoColors {
   static const Color textDark = Color(0xFF1F2937);
   static const Color textGray = Colors.black54;
   static const Color shadowColor = Colors.black12;
+  static const Color accentGreen = Colors.green;
 }
 
 class NavigoTextStyles {
   static const TextStyle titleLarge = TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.bold,
+    color: NavigoColors.textDark,
   );
   static const TextStyle titleMedium = TextStyle(
     fontSize: 20,
@@ -60,13 +62,24 @@ class NavigoDecorations {
           Container(
             decoration: kTopBarBackButton,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               onPressed: onBack,
             ),
           ),
-          const CircleAvatar(
-            radius: 18,
-            backgroundImage: AssetImage('assets/images/logo.png'),
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain, // مهم حتى تظهر الصورة كاملة
+                  width: 30,
+                  height: 30,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -74,8 +87,9 @@ class NavigoDecorations {
   }
 
   static final BoxDecoration kCardDecoration = BoxDecoration(
-    color: Colors.white,
+    color: const Color.fromARGB(255, 247, 241, 234),
     borderRadius: const BorderRadius.all(Radius.circular(20)),
+    border: Border.all(color: NavigoColors.primaryOrange, width: 1.2),
     boxShadow: [
       BoxShadow(
         color: Colors.grey.withOpacity(0.1),
@@ -86,9 +100,18 @@ class NavigoDecorations {
     ],
   );
 
-  static const BoxDecoration kLightCardDecoration = BoxDecoration(
-    color: NavigoColors.cardLight,
-    borderRadius: BorderRadius.all(Radius.circular(20)),
+  static final BoxDecoration kLightCardDecoration = BoxDecoration(
+    color: const Color.fromARGB(255, 247, 241, 234),
+    borderRadius: const BorderRadius.all(Radius.circular(20)),
+    border: Border.all(color: NavigoColors.primaryOrange, width: 1.2),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.1),
+        offset: const Offset(0, 2),
+        blurRadius: 10,
+        spreadRadius: 2,
+      ),
+    ],
   );
 
   static BoxDecoration kTopBarBackButton = BoxDecoration(
@@ -125,7 +148,8 @@ class NavigoDecorations {
 
   static ButtonStyle kPrimaryButtonLargeStyle = ElevatedButton.styleFrom(
     backgroundColor: NavigoColors.primaryOrange,
-    shape: RoundedRectangleBorder(
+    foregroundColor: Colors.white, // ← This makes text white
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(30)),
     ),
     elevation: 0,

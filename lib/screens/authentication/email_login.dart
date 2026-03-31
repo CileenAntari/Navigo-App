@@ -48,7 +48,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         children: [
                           const Text(
                             "Route Manager Login",
-                            style: NavigoTextStyles.titleMedium,
+                            style: NavigoTextStyles.titleLarge,
                           ),
                           const SizedBox(height: 8),
                           const Text(
@@ -64,7 +64,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
+                              color: Colors.green.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
@@ -83,6 +83,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _emailController,
+                            // ← Forces black text in the email field
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: NavigoDecorations.kInputDecoration
                                 .copyWith(
                                   hintText: "RouteManager@navigo.com",
@@ -104,6 +109,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                           TextField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
+                            // ← Forces black text in the password field
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: NavigoDecorations.kInputDecoration
                                 .copyWith(
                                   prefixIcon: const Icon(
@@ -162,9 +172,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                                   ),
                                 );
                               },
-                              child: const Text(
+                              child: Text(
                                 "Back to user login",
-                                style: NavigoTextStyles.buttonOrangeLink,
+                                style: NavigoTextStyles.button.copyWith(
+                                  color: NavigoColors.accentGreen,
+                                ),
                               ),
                             ),
                           ),
