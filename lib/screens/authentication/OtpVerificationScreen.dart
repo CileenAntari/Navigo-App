@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../passenger/passengerHomeScreen.dart';
+import '../../models/driver.dart';
+import 'SignupApproval.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -10,6 +12,8 @@ class OtpVerificationScreen extends StatefulWidget {
 
  final String? fullName;
 final String? role;
+  final Map<String, dynamic>? driverData;
+
 
   const OtpVerificationScreen({
   super.key,
@@ -17,6 +21,8 @@ final String? role;
   required this.verificationId,
   this.fullName,
   this.role,
+  this.driverData, // ✅ add here
+
 });
 
   @override
@@ -52,18 +58,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   try {
+    // ✅ Verify OTP
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
       verificationId: widget.verificationId,
       smsCode: otp,
     );
 
-    // ✅ Sign in
     UserCredential userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
-
     String uid = userCredential.user!.uid;
 
-    // ✅ Split name safely
+    // ✅ Split full name safely
     String firstName = "";
     String lastName = "";
     if (widget.fullName != null && widget.fullName!.isNotEmpty) {
@@ -72,7 +77,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       lastName = names.length > 1 ? names[1] : "";
     }
 
-    // ✅ Save user (merge avoids overwriting existing fields)
+    // ✅ Save user data in 'users' collection
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -84,9 +89,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           "image": null,
           "role": widget.role ?? "passenger",
           "isVerified": true,
-        },SetOptions(merge: true));
+        }, SetOptions(merge: true));
 
-    // ✅ Passenger-specific data
+    // ✅ Role-specific collections
     if (widget.role == "passenger") {
       await FirebaseFirestore.instance
           .collection('passengers')
@@ -95,15 +100,43 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         "tripHistory": [],
         "paymentMethods": [],
       }, SetOptions(merge: true));
-    }
+      // Navigate to passenger home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const PassengerHomeScreen(),
+        ),
+      );
+    } else if (widget.role == "driver" && widget.driverData != null) {
+      // Create DriverModel object
+      final driver = DriverModel(
+        userId: uid,
+        firstName: firstName,
+        lastName: lastName,
+        phone: widget.phoneNumber,
+        image: null,
+        role: "driver",
+        isVerified: true,
+        vehicle: widget.driverData!['vehicle'] ?? '',
+        route: widget.driverData!['route'] ?? '',
+        availability: widget.driverData!['availability'] ?? true,
+        licenseNumber: widget.driverData!['licenseNumber'] ?? '',
+      );
 
-    // ✅ Navigate
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const PassengerHomeScreen(),
-      ),
-    );
+      // Save to 'drivers' collection
+      await FirebaseFirestore.instance
+          .collection('drivers')
+          .doc(uid)
+          .set(driver.toMap(), SetOptions(merge: true));
+
+      // Navigate to driver home (replace with your DriverHomeScreen)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const SignupApprovalScreen(), // TODO: Replace with DriverHomeScreen
+        ),
+      );
+    }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Invalid OTP: $e")),
