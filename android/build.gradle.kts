@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         // Add the Google Services plugin classpath
-        classpath("com.google.gms:google-services:4.3.15") // or latest version
+        classpath("com.google.gms:google-services:4.4.0")
     }
 }
 
