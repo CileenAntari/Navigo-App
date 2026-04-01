@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
 
   @override
-  State<HelpSupportScreen> createState() =>
-      _HelpSupportScreenState();
+  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
 }
 
-class _HelpSupportScreenState
-    extends State<HelpSupportScreen> {
-  final TextEditingController _controller =
-      TextEditingController();
+class _HelpSupportScreenState extends State<HelpSupportScreen> {
+  final TextEditingController _controller = TextEditingController();
 
   void _submitComplaint() {
     final text = _controller.text.trim();
 
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter your complaint")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Enter your complaint")));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Complaint sent")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Complaint sent")));
 
     _controller.clear();
 
@@ -35,69 +33,69 @@ class _HelpSupportScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-
-      appBar: AppBar(
-        title: const Text("Help & Support"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SafeArea(
         child: Column(
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Describe your issue",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+            /// TOP BAR
+            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
+
+            /// TITLE
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: const [
+                  Text("Help & Support", style: NavigoTextStyles.titleLarge),
+                ],
               ),
             ),
 
-            const SizedBox(height: 10),
+            /// BODY
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(20),
+                  decoration: NavigoDecorations.kCardDecoration,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// LABEL
+                      const Text(
+                        "Having an issue? Send us your complaint.",
+                        style: NavigoTextStyles.titleSmall,
+                      ),
 
-            TextField(
-              controller: _controller,
-              maxLines: 6,
-              decoration: InputDecoration(
-                hintText: "Write your complaint here...",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+                      const SizedBox(height: 10),
 
-            const SizedBox(height: 20),
+                      /// TEXT FIELD
+                      TextField(
+                        controller: _controller,
+                        maxLines: 6,
 
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _submitComplaint,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFFF9800),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(25),
+                        /// ✅ Make text black
+                        style: const TextStyle(color: NavigoColors.textDark),
+
+                        decoration: NavigoDecorations.kInputDecoration.copyWith(
+                          hintText: "Write your complaint here...",
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// BUTTON
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _submitComplaint,
+                          style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                          child: const Text("Submit"),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
-                ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-// ✅ IMPORT NAV BAR
+import '../../theme/app_theme.dart';
 import 'PassengerBottomNavBar.dart';
+import '../passenger/PassengerHomeScreen.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final String? selectedLine;
@@ -39,31 +40,27 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Future<void> _pickTime() async {
-    TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (picked != null) setState(() => _selectedTime = picked);
   }
 
-  String _formatDate() =>
-      _selectedDate == null
-          ? "Select date"
-          : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}";
+  String _formatDate() => _selectedDate == null
+      ? "Select date"
+      : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}";
 
-  String _formatTime() =>
-      _selectedTime == null
-          ? "Select time"
-          : "${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
+  String _formatTime() => _selectedTime == null
+      ? "Select time"
+      : "${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
 
   void _incrementSeat() {
-    if (_seatCount < 10) {
-      setState(() => _seatCount++);
-    }
+    if (_seatCount < 10) setState(() => _seatCount++);
   }
 
   void _decrementSeat() {
-    if (_seatCount > 1) {
-      setState(() => _seatCount--);
-    }
+    if (_seatCount > 1) setState(() => _seatCount--);
   }
 
   void _confirmSchedule() {
@@ -76,7 +73,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       );
       return;
     }
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Ride Scheduled: $_seatCount seat(s) 🚀")),
     );
@@ -85,153 +81,241 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /// ✅ NAV BAR
-      bottomNavigationBar: const PassengerBottomNavBar(
-        currentIndex: 1,
-      ),
-
+      backgroundColor: NavigoColors.backgroundLight,
+      bottomNavigationBar: const PassengerBottomNavBar(currentIndex: 1),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// TITLE
-              const Text(
-                "Schedule Ride",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+        child: Column(
+          children: [
+            // ── TOP BAR ──────────────────────────────────
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const PassengerHomeScreen()),
               ),
+            ),
+            // ── CONTENT ──────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── TITLE ──────────────────────────────
+                    Text("Schedule Ride", style: NavigoTextStyles.titleLarge),
 
-              const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-              /// VEHICLE TYPE
-              Row(
-                children: _vehicles
-                    .map((v) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: ChoiceChip(
-                              label: Text(v),
-                              selected: _vehicleType == v,
-                              selectedColor: Colors.orange,
-                              onSelected: (_) =>
-                                  setState(() => _vehicleType = v),
+                    // ── VEHICLE TYPE ───────────────────────
+                    Text("Vehicle Type", style: NavigoTextStyles.label),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: _vehicles
+                          .map(
+                            (v) => Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _vehicleType = v),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _vehicleType == v
+                                          ? NavigoColors.primaryOrange
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: NavigoColors.primaryOrange,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        v,
+                                        style: TextStyle(
+                                          color: _vehicleType == v
+                                              ? Colors.white
+                                              : NavigoColors.primaryOrange,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ── SELECTED LINE ──────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 16,
+                      ),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.directions_bus,
+                            color: NavigoColors.primaryOrange,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Line: ${_selectedLine ?? 'None'}",
+                            style: NavigoTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
                             ),
                           ),
-                        ))
-                    .toList(),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// SELECTED LINE
-              Text(
-                "Selected Line: ${_selectedLine ?? 'None'}",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// SEAT SELECTOR
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.orange, width: 1.5),
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      "Number of Seats",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: _decrementSeat,
-                          icon: const Icon(Icons.remove_circle_outline,
-                              size: 32),
-                          color: Colors.orange,
+
+                    const SizedBox(height: 20),
+
+                    // ── SEAT SELECTOR ──────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Column(
+                        children: [
+                          Text(
+                            "Number of Seats",
+                            style: NavigoTextStyles.titleSmall,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: _decrementSeat,
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  size: 32,
+                                ),
+                                color: NavigoColors.primaryOrange,
+                              ),
+                              const SizedBox(width: 20),
+                              Text(
+                                '$_seatCount',
+                                style: NavigoTextStyles.titleLarge,
+                              ),
+                              const SizedBox(width: 20),
+                              IconButton(
+                                onPressed: _incrementSeat,
+                                icon: const Icon(
+                                  Icons.add_circle_outline,
+                                  size: 32,
+                                ),
+                                color: NavigoColors.primaryOrange,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ── DATE PICKER ────────────────────────
+                    Text("Date", style: NavigoTextStyles.label),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickDate,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 16,
                         ),
-                        const SizedBox(width: 20),
-                        Text(
-                          '$_seatCount',
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
+                        decoration: NavigoDecorations.kCardDecoration,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today,
+                              color: NavigoColors.primaryOrange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _formatDate(),
+                              style: NavigoTextStyles.bodyMedium.copyWith(
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        IconButton(
-                          onPressed: _incrementSeat,
-                          icon:
-                              const Icon(Icons.add_circle_outline, size: 32),
-                          color: Colors.orange,
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // ── TIME PICKER ────────────────────────
+                    Text("Time", style: NavigoTextStyles.label),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickTime,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 16,
                         ),
-                      ],
+                        decoration: NavigoDecorations.kCardDecoration,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              color: NavigoColors.primaryOrange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _formatTime(),
+                              style: NavigoTextStyles.bodyMedium.copyWith(
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // ── CONFIRM BUTTON ─────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: _confirmSchedule,
+                        style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                        child: const Text(
+                          "Confirm Schedule",
+                          style: NavigoTextStyles.button,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              /// DATE PICKER
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  side: const BorderSide(color: Colors.grey),
-                ),
-                leading:
-                    const Icon(Icons.calendar_today, color: Colors.orange),
-                title: Text(_formatDate()),
-                onTap: _pickDate,
-              ),
-
-              const SizedBox(height: 15),
-
-              /// TIME PICKER
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  side: const BorderSide(color: Colors.grey),
-                ),
-                leading:
-                    const Icon(Icons.access_time, color: Colors.orange),
-                title: Text(_formatTime()),
-                onTap: _pickTime,
-              ),
-
-              const SizedBox(height: 25),
-
-              /// CONFIRM BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _confirmSchedule,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text(
-                    "Confirm Schedule",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// ✅ Splash Screen (NO Firebase here)
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

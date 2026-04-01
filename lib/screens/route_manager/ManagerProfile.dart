@@ -1,25 +1,23 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../theme/app_theme.dart';
-import '../passenger/PassengerBottomNavBar.dart';
-import '../passenger/support_screen.dart';
-import '../passenger/PassengerHomeScreen.dart';
+import 'RouteManagerNavBar.dart';
+import 'RouteSchedule.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class ManagerProfile extends StatefulWidget {
+  const ManagerProfile({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ManagerProfile> createState() => _ManagerProfileState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ManagerProfileState extends State<ManagerProfile> {
   final TextEditingController _nameController = TextEditingController(
     text: "Lara Shaltaf",
   );
-  final TextEditingController _phoneController = TextEditingController(
-    text: "+970591234567",
+  final TextEditingController _emailController = TextEditingController(
+    text: "lara@example.com",
   );
 
   final ImagePicker _picker = ImagePicker();
@@ -27,47 +25,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isEditing = false;
 
-  void _toggleEdit() {
-    setState(() => _isEditing = !_isEditing);
-  }
+  void _toggleEdit() => setState(() => _isEditing = !_isEditing);
 
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source);
-
-    if (picked != null) {
-      setState(() {
-        _image = File(picked.path);
-      });
-    }
+    if (picked != null) setState(() => _image = File(picked.path));
   }
 
   void _showImagePicker() {
     showModalBottomSheet(
       context: context,
-      builder: (_) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text("Take Photo"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text("Choose from Gallery"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Choose from Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -77,16 +66,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _saveProfile() {
     setState(() => _isEditing = false);
-
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("Profile updated")));
+    // TODO: save changes to Firebase
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const PassengerBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: const RouteManagerNavBar(currentIndex: 3),
 
       body: SafeArea(
         child: Column(
@@ -95,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             NavigoDecorations.topBar(
               onBack: () => Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const PassengerHomeScreen()),
+                MaterialPageRoute(builder: (_) => const RouteSchedule()),
               ),
             ),
 
@@ -136,7 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : const AssetImage("assets/images/logo.png")
                                       as ImageProvider,
                           ),
-
                           if (_isEditing)
                             Positioned(
                               bottom: 0,
@@ -159,27 +147,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
 
-                      /// NAME
+                      /// NAME FIELD
                       _field(
                         "Full Name",
                         _nameController,
                         _isEditing,
                         Icons.person,
                       ),
-
                       const SizedBox(height: 16),
 
-                      /// PHONE
+                      /// EMAIL FIELD
                       _field(
-                        "Phone",
-                        _phoneController,
+                        "Email",
+                        _emailController,
                         _isEditing,
-                        Icons.phone,
+                        Icons.email,
                       ),
-
                       const SizedBox(height: 20),
 
                       /// SAVE BUTTON
@@ -192,8 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: const Text("Save"),
                           ),
                         ),
-
-                      const SizedBox(height: 20),
+                      if (_isEditing) const SizedBox(height: 20),
 
                       /// SETTINGS
                       Align(
@@ -205,21 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
-                      _settingsItem(
-                        icon: Icons.help_outline,
-                        title: "Help & Support",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HelpSupportScreen(),
-                            ),
-                          );
-                        },
-                      ),
 
                       _settingsItem(
                         icon: Icons.logout,
@@ -253,13 +223,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         TextField(
           controller: controller,
           enabled: enabled,
-
-          // ✅ Make text black
           style: const TextStyle(
             color: NavigoColors.textDark,
             fontWeight: FontWeight.w500,
           ),
-
           decoration: NavigoDecorations.kInputDecoration.copyWith(
             prefixIcon: Icon(icon, color: NavigoColors.primaryOrange),
           ),
@@ -268,6 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  /// SETTINGS ITEM
   Widget _settingsItem({
     required IconData icon,
     required String title,

@@ -11,6 +11,7 @@ class NavigoColors {
   static const Color textGray = Colors.black54;
   static const Color shadowColor = Colors.black12;
   static const Color accentGreen = Colors.green;
+  static const Color lightorange = Color.fromARGB(255, 247, 241, 234);
 }
 
 class NavigoTextStyles {

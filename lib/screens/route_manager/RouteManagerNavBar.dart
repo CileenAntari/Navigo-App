@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:navigo/screens/passenger/Triphistoryscreen.dart';
-import 'passengerHomeScreen.dart';
-import 'schedulescreen.dart';
-//import 'RouteDetailsScreen.dart';
-import 'ProfileScreen.dart';
+import 'ManagerProfile.dart';
+import 'Reports.dart';
+import 'RouteSchedule.dart';
+import 'AssignDriver.dart';
 
-class PassengerBottomNavBar extends StatelessWidget {
+class RouteManagerNavBar extends StatelessWidget {
   final int currentIndex;
 
-  const PassengerBottomNavBar({super.key, required this.currentIndex});
+  const RouteManagerNavBar({super.key, required this.currentIndex});
 
   void _onItemTapped(BuildContext context, int index) {
     if (index == currentIndex) return;
@@ -17,20 +16,19 @@ class PassengerBottomNavBar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        screen = const PassengerHomeScreen();
+        screen = const RouteSchedule();
         break;
       case 1:
-        screen = const ScheduleScreen();
+        screen = const AssignDriver();
         break;
       case 2:
-        screen = const TripHistoryScreen();
-        //screen = const RouteDetailsScreen();
+        screen = const Reports();
         break;
       case 3:
-        screen = const ProfileScreen();
+        screen = const ManagerProfile();
         break;
       default:
-        screen = const PassengerHomeScreen();
+        screen = const RouteSchedule();
     }
 
     Navigator.pushReplacement(
@@ -54,10 +52,10 @@ class PassengerBottomNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildItem(context, 0, Icons.home_outlined, "Home"),
-              _buildItem(context, 1, Icons.directions_bus_outlined, "Schedule"),
-              _buildItem(context, 2, Icons.receipt_long_outlined, "Trips"),
-              _buildItem(context, 3, Icons.person_outline, "Profile"),
+              _buildItem(context, 0, Icons.schedule, "Schedule"),
+              _buildItem(context, 1, Icons.assignment, "Assign"),
+              _buildItem(context, 2, Icons.bar_chart, "Reports"),
+              _buildItem(context, 3, Icons.person, "Profile"),
             ],
           ),
         ),

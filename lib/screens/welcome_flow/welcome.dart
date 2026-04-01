@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'role.dart';
 import '../authentication/PhoneNumberScreen.dart';
-import '../passenger/passengerhomescreen.dart'; // ✅ Add this import
+import '../passenger/passengerhomescreen.dart';
+import 'package:navigo/screens/route_manager/RouteSchedule.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -98,7 +99,7 @@ class OnboardingScreen extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          /// ✨ Continue as Guest
+          /// ✨ Continue as passenger (Guest)
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -106,6 +107,24 @@ class OnboardingScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => const PassengerHomeScreen(),
                 ),
+              );
+            },
+            child: Text(
+              'Continue as guest',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+
+          /// ✨ Continue as route manager (Guest)
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const RouteSchedule()),
               );
             },
             child: Text(
