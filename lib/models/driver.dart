@@ -1,4 +1,4 @@
-import 'user.dart'; // your abstract UserModel
+import 'user.dart';
 
 class DriverModel extends UserModel {
   final String vehicle;
@@ -7,59 +7,40 @@ class DriverModel extends UserModel {
   final String licenseNumber;
 
   DriverModel({
-    required String userId,
-    required String firstName,
-    required String lastName,
-    required String phone,
-    String? image,
-    required String role,
-    required bool isVerified,
+    required super.userId,
+    required super.firstName,
+    required super.lastName,
+    required super.phone,
+    super.image,
+    required super.role,
+    required super.isVerified,
     required this.vehicle,
     required this.route,
     required this.availability,
     required this.licenseNumber,
-  }) : super(
-          userId: userId,
-          firstName: firstName,
-          lastName: lastName,
-          phone: phone,
-          image: image,
-          role: role,
-          isVerified: isVerified,
-        );
+  });
 
-  // Convert DriverModel to Map for Firestore
+  // ✅ SAME as Passenger → only base user fields
   @override
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
-      'firstName': firstName,
-      'lastName': lastName,
-      'phone': phone,
-      'image': image,
-      'role': role,
-      'isVerified': isVerified,
-      'vehicle': vehicle,
-      'route': route,
-      'availability': availability,
-      'licenseNumber': licenseNumber,
+      "userId": userId,
+      "firstName": firstName,
+      "lastName": lastName,
+      "phone": phone,
+      "image": image,
+      "role": role,
+      "isVerified": isVerified,
     };
   }
 
-  // Create DriverModel from Firestore Map
-  factory DriverModel.fromMap(Map<String, dynamic> map) {
-    return DriverModel(
-      userId: map['userId'] ?? '',
-      firstName: map['firstName'] ?? '',
-      lastName: map['lastName'] ?? '',
-      phone: map['phone'] ?? '',
-      image: map['image'],
-      role: map['role'] ?? 'driver',
-      isVerified: map['isVerified'] ?? false,
-      vehicle: map['vehicle'] ?? '',
-      route: map['route'] ?? '',
-      availability: map['availability'] ?? true,
-      licenseNumber: map['licenseNumber'] ?? '',
-    );
+  // ✅ ONLY driver-specific fields
+  Map<String, dynamic> toDriverMap() {
+    return {
+      "vehicle": vehicle,
+      "route": route,
+      "availability": availability,
+      "licenseNumber": licenseNumber,
+    };
   }
 }

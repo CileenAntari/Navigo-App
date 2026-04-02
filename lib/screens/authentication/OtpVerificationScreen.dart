@@ -9,21 +9,18 @@ import 'SignupApproval.dart';
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
-
- final String? fullName;
-final String? role;
+  final String? fullName;
+  final String? role;
   final Map<String, dynamic>? driverData;
 
-
   const OtpVerificationScreen({
-  super.key,
-  required this.phoneNumber,
-  required this.verificationId,
-  this.fullName,
-  this.role,
-  this.driverData, // ✅ add here
-
-});
+    super.key,
+    required this.phoneNumber,
+    required this.verificationId,
+    this.fullName,
+    this.role,
+    this.driverData,
+  });
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -32,33 +29,26 @@ final String? role;
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<TextEditingController> _otpControllers =
       List.generate(6, (_) => TextEditingController());
-
-  final List<FocusNode> _focusNodes =
-      List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
   void dispose() {
-    for (var c in _otpControllers) {
-      c.dispose();
-    }
-    for (var f in _focusNodes) {
-      f.dispose();
-    }
+    for (var c in _otpControllers) c.dispose();
+    for (var f in _focusNodes) f.dispose();
     super.dispose();
   }
 
-  void _onContinue() async {
+ void _onContinue() async {
   String otp = _otpControllers.map((e) => e.text).join();
 
   if (otp.length != 6) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Enter a valid 6-digit OTP")),
-    );
+        const SnackBar(content: Text("Enter a valid 6-digit OTP")));
     return;
   }
 
   try {
-    // ✅ Verify OTP
+    // 1️⃣ Verify OTP
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
       verificationId: widget.verificationId,
       smsCode: otp,
@@ -66,9 +56,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     UserCredential userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
+
     String uid = userCredential.user!.uid;
 
-    // ✅ Split full name safely
+    // 2️⃣ Split full name
     String firstName = "";
     String lastName = "";
     if (widget.fullName != null && widget.fullName!.isNotEmpty) {
@@ -77,21 +68,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       lastName = names.length > 1 ? names[1] : "";
     }
 
-    // ✅ Save user data in 'users' collection
+    // 3️⃣ Prepare user data
+    Map<String, dynamic> userData = {
+      "userId": uid,
+      "phone": widget.phoneNumber,
+      "image": null,
+      "isVerified": true,
+    };
+
+    if (widget.fullName != null) {
+      userData["firstName"] = firstName;
+      userData["lastName"] = lastName;
+    }
+
+    if (widget.role != null) {
+      userData["role"] = widget.role;
+    }
+
+    // 4️⃣ Save user document
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .set({
-          "userId": uid,
-          "firstName": firstName,
-          "lastName": lastName,
-          "phone": widget.phoneNumber,
-          "image": null,
-          "role": widget.role ?? "passenger",
-          "isVerified": true,
-        }, SetOptions(merge: true));
+        .set(userData, SetOptions(merge: true));
+    debugPrint("✅ User saved/updated in 'users': $uid");
 
-    // ✅ Role-specific collections
+    // 5️⃣ Passenger signup
     if (widget.role == "passenger") {
       await FirebaseFirestore.instance
           .collection('passengers')
@@ -100,53 +101,82 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         "tripHistory": [],
         "paymentMethods": [],
       }, SetOptions(merge: true));
-      // Navigate to passenger home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const PassengerHomeScreen(),
-        ),
-      );
-    } else if (widget.role == "driver" && widget.driverData != null) {
-      // Create DriverModel object
-      final driver = DriverModel(
-        userId: uid,
-        firstName: firstName,
-        lastName: lastName,
-        phone: widget.phoneNumber,
-        image: null,
-        role: "driver",
-        isVerified: true,
-        vehicle: widget.driverData!['vehicle'] ?? '',
-        route: widget.driverData!['route'] ?? '',
-        availability: widget.driverData!['availability'] ?? true,
-        licenseNumber: widget.driverData!['licenseNumber'] ?? '',
-      );
+      debugPrint("✅ Passenger document created: $uid");
 
-      // Save to 'drivers' collection
-      await FirebaseFirestore.instance
-          .collection('drivers')
-          .doc(uid)
-          .set(driver.toMap(), SetOptions(merge: true));
-
-      // Navigate to driver home (replace with your DriverHomeScreen)
       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SignupApprovalScreen(), // TODO: Replace with DriverHomeScreen
-        ),
+          context,
+          MaterialPageRoute(
+              builder: (_) => const PassengerHomeScreen()));
+      return;
+    }
+
+    // 6️⃣ Driver signup – always attempt to add/update driver
+    // 6️⃣ Driver signup – like passenger (clean separation)
+if (widget.role == "driver") {
+  Map<String, dynamic> driverInfo = widget.driverData ?? {};
+
+  final driver = DriverModel(
+    userId: uid,
+    firstName: firstName,
+    lastName: lastName,
+    phone: widget.phoneNumber,
+    image: null,
+    role: "driver",
+    isVerified: true,
+    vehicle: driverInfo['vehicle'] ?? '',
+    route: driverInfo['route'] ?? '',
+    availability: driverInfo['availability'] ?? true,
+    licenseNumber: driverInfo['licenseNumber'] ?? '',
+  );
+
+  // ✅ Save ONLY driver fields (LIKE passenger)
+  await FirebaseFirestore.instance
+      .collection('drivers')
+      .doc(uid)
+      .set(driver.toDriverMap(), SetOptions(merge: true));
+
+  debugPrint("✅ Driver data saved (ONLY driver fields)");
+
+  Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (_) => const SignupApprovalScreen()));
+  return;
+}
+
+    // 7️⃣ Existing user login flow
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    String role = userDoc.get("role");
+
+    if (role == "passenger") {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (_) => const PassengerHomeScreen()));
+    } else if (role == "driver") {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (_) => const SignupApprovalScreen()));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User role not found")),
       );
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Invalid OTP: $e")),
-    );
+    debugPrint("❌ OTP verification or Firestore error: $e");
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Error: $e")));
   }
 }
+
   void _resendCode() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Resend not implemented yet")),
-    );
+        const SnackBar(content: Text("Resend not implemented yet")));
   }
 
   Widget _buildOtpTextField(int index) {
@@ -206,7 +236,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         child: Column(
           children: [
             NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
-
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -215,9 +244,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     constraints: const BoxConstraints(maxWidth: 450),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 32,
-                        horizontal: 24,
-                      ),
+                          vertical: 32, horizontal: 24),
                       decoration: NavigoDecorations.kCardDecoration,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -233,17 +260,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             style: NavigoTextStyles.bodySmall,
                           ),
                           const SizedBox(height: 28),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(
-                              6,
-                              (index) => _buildOtpTextField(index),
-                            ),
+                                6, (index) => _buildOtpTextField(index)),
                           ),
-
                           const SizedBox(height: 20),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -260,9 +282,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 24),
-
                           SizedBox(
                             width: double.infinity,
                             height: 52,
@@ -281,16 +301,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 12),
-
                           const Text(
                             "note: OTP expires in 2 minutes.",
                             style: NavigoTextStyles.bodySmall,
                           ),
-
                           const SizedBox(height: 12),
-
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: const Text(

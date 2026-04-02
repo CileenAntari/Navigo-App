@@ -14,6 +14,11 @@ class PhoneNumberScreen extends StatefulWidget {
 class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   final TextEditingController _phoneController = TextEditingController();
 
+  // Optional: store full name & role if coming from signup
+  String? fullName;
+  String? role; // "passenger" or "driver"
+  Map<String, dynamic>? driverData;
+
   void _sendOtp() async {
     String phoneNumber = _phoneController.text.trim();
 
@@ -27,11 +32,11 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
+        // Auto login (optional)
         await FirebaseAuth.instance.signInWithCredential(credential);
       },
       verificationFailed: (FirebaseAuthException e) {
         if (!mounted) return;
-
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
@@ -45,6 +50,9 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
             builder: (_) => OtpVerificationScreen(
               phoneNumber: phoneNumber,
               verificationId: verificationId,
+              fullName: fullName, // Pass full name if exists
+              role: role, // Pass role if exists
+              driverData: driverData, // Pass driver info if exists
             ),
           ),
         );
@@ -83,14 +91,11 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               "Enter your phone number",
                               style: NavigoTextStyles.titleLarge,
                             ),
-
                             const SizedBox(height: 8),
-
                             const Text(
                               "We'll send you a one-time code (OTP) to verify your number.",
                               style: NavigoTextStyles.bodyMedium,
                             ),
-
                             const SizedBox(height: 20),
 
                             /// Phone Field
@@ -102,25 +107,23 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                             TextField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
-                              // ← Forces black text in the text field
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                               ),
                               decoration: NavigoDecorations.kInputDecoration
                                   .copyWith(
-                                    hintText: "e.g. +97059 000 0000",
-                                    prefixIcon: const Icon(
-                                      Icons.phone_outlined,
-                                      color: Colors.green,
-                                    ),
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () => _phoneController.clear(),
-                                    ),
-                                  ),
+                                hintText: "e.g. +97059 000 0000",
+                                prefixIcon: const Icon(
+                                  Icons.phone_outlined,
+                                  color: Colors.green,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () => _phoneController.clear(),
+                                ),
+                              ),
                             ),
-
                             const SizedBox(height: 25),
 
                             /// Send OTP Button
@@ -144,7 +147,6 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 10),
 
                             /// Email Login
