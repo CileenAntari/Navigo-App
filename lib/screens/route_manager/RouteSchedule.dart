@@ -86,8 +86,10 @@ class _RouteScheduleState extends State<RouteSchedule> {
       context,
       MaterialPageRoute(builder: (_) => const AddScheduleSlotScreen()),
     );
-    if (result != null)
+
+    if (result != null) {
       setState(() => slots.add(Map<String, String>.from(result)));
+    }
   }
 
   @override
@@ -101,16 +103,12 @@ class _RouteScheduleState extends State<RouteSchedule> {
       bottomNavigationBar: const RouteManagerNavBar(currentIndex: 0),
       body: Stack(
         children: [
-          // ── MAIN BACKGROUND ─────────────────────────────
           Container(color: NavigoColors.backgroundLight),
-
-          // ── SAFE AREA ───────────────────────────────────
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // ── HEADER ───────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -139,7 +137,6 @@ class _RouteScheduleState extends State<RouteSchedule> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── TYPE FILTER CHIPS ────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -150,23 +147,92 @@ class _RouteScheduleState extends State<RouteSchedule> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── SLOT LIST ───────────────────────────
                   Expanded(
                     child: filteredSlots.isEmpty
                         ? const Center(child: Text("No Slots"))
                         : ListView.builder(
                             itemCount: filteredSlots.length,
-                            itemBuilder: (_, index) => GestureDetector(
-                              onTap: () =>
-                                  showDeleteDialog(filteredSlots[index]["id"]!),
-                              child: buildSlotCard(filteredSlots[index]),
-                            ),
+                            itemBuilder: (_, index) {
+                              final slot = filteredSlots[index];
+
+                              return Dismissible(
+                                key: ValueKey(slot["id"]),
+                                direction: DismissDirection.endToStart,
+                                confirmDismiss: (_) async {
+                                  bool shouldDelete = false;
+
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text("Delete Slot"),
+                                      content: const Text("Remove this slot?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Cancel"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            shouldDelete = true;
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            "Delete",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  return shouldDelete;
+                                },
+                                onDismissed: (_) {
+                                  deleteSlot(slot["id"]!);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Slot deleted"),
+                                    ),
+                                  );
+                                },
+                                background: Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  alignment: Alignment.centerRight,
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Delete",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                child: buildSlotCard(slot),
+                              );
+                            },
                           ),
                   ),
 
                   const SizedBox(height: 10),
 
-                  // ── ACTION BUTTONS ──────────────────────
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -255,7 +321,7 @@ class _RouteScheduleState extends State<RouteSchedule> {
             ),
             child: Text(
               slot["line"]!,
-              style: TextStyle(
+              style: const TextStyle(
                 color: NavigoColors.primaryOrange,
                 fontWeight: FontWeight.bold,
               ),

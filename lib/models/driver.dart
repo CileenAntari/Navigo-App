@@ -5,6 +5,7 @@ class DriverModel extends UserModel {
   final String route;
   final bool availability;
   final String licenseNumber;
+  final bool isApproved;
 
   DriverModel({
     required super.userId,
@@ -18,9 +19,9 @@ class DriverModel extends UserModel {
     required this.route,
     required this.availability,
     required this.licenseNumber,
+    required this.isApproved,
   });
 
-  // ✅ SAME as Passenger → only base user fields
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -31,16 +32,38 @@ class DriverModel extends UserModel {
       "image": image,
       "role": role,
       "isVerified": isVerified,
+      "vehicle": vehicle,
+      "route": route,
+      "availability": availability,
+      "licenseNumber": licenseNumber,
+      "isApproved": isApproved,
     };
   }
 
-  // ✅ ONLY driver-specific fields
   Map<String, dynamic> toDriverMap() {
     return {
       "vehicle": vehicle,
       "route": route,
       "availability": availability,
       "licenseNumber": licenseNumber,
+      "isApproved": isApproved,
     };
+  }
+
+  factory DriverModel.fromMap(Map<String, dynamic> map) {
+    return DriverModel(
+      userId: map["userId"] ?? "",
+      firstName: map["firstName"] ?? "",
+      lastName: map["lastName"] ?? "",
+      phone: map["phone"] ?? "",
+      image: map["image"],
+      role: map["role"] ?? "driver",
+      isVerified: map["isVerified"] ?? false,
+      vehicle: map["vehicle"] ?? "",
+      route: map["route"] ?? "",
+      availability: map["availability"] ?? false,
+      licenseNumber: map["licenseNumber"] ?? "",
+      isApproved: map["isApproved"] ?? false,
+    );
   }
 }

@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../theme/app_theme.dart';
 import 'RouteManagerNavBar.dart';
 import 'RouteSchedule.dart';
@@ -13,23 +16,56 @@ class ManagerProfile extends StatefulWidget {
 }
 
 class _ManagerProfileState extends State<ManagerProfile> {
-  final TextEditingController _nameController = TextEditingController(
-    text: "Lara Shaltaf",
-  );
-  final TextEditingController _emailController = TextEditingController(
-    text: "lara@example.com",
-  );
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
   File? _image;
-
   bool _isEditing = false;
 
-  void _toggleEdit() => setState(() => _isEditing = !_isEditing);
+  User? currentUser;
+  late DocumentReference userDocRef;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      userDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid);
+      _loadUserData();
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      DocumentSnapshot snapshot = await userDocRef.get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+
+        _nameController.text =
+            "${data['firstName'] ?? ''} ${data['lastName'] ?? ''}".trim();
+
+        _emailController.text = data['email'] ?? currentUser?.email ?? '';
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint("Error loading manager data: $e");
+    }
+  }
+
+  void _toggleEdit() {
+    setState(() => _isEditing = !_isEditing);
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source);
-    if (picked != null) setState(() => _image = File(picked.path));
+    if (picked != null) {
+      setState(() => _image = File(picked.path));
+    }
   }
 
   void _showImagePicker() {
@@ -60,23 +96,48 @@ class _ManagerProfileState extends State<ManagerProfile> {
     );
   }
 
-  void _logout() {
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
+    if (currentUser == null) return;
+
     setState(() => _isEditing = false);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Profile updated")));
-    // TODO: save changes to Firebase
+
+    List<String> names = _nameController.text.trim().split(" ");
+    String firstName = names.isNotEmpty ? names.first : "";
+    String lastName = names.length > 1 ? names.sublist(1).join(" ") : "";
+
+    try {
+      await userDocRef.update({
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": _emailController.text.trim(),
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Profile updated")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to update profile: $e")));
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: const RouteManagerNavBar(currentIndex: 3),
-
       body: SafeArea(
         child: Column(
           children: [
@@ -147,6 +208,7 @@ class _ManagerProfileState extends State<ManagerProfile> {
                             ),
                         ],
                       ),
+
                       const SizedBox(height: 20),
 
                       /// NAME FIELD
@@ -156,6 +218,7 @@ class _ManagerProfileState extends State<ManagerProfile> {
                         _isEditing,
                         Icons.person,
                       ),
+
                       const SizedBox(height: 16),
 
                       /// EMAIL FIELD
@@ -165,6 +228,7 @@ class _ManagerProfileState extends State<ManagerProfile> {
                         _isEditing,
                         Icons.email,
                       ),
+
                       const SizedBox(height: 20),
 
                       /// SAVE BUTTON
@@ -177,6 +241,7 @@ class _ManagerProfileState extends State<ManagerProfile> {
                             child: const Text("Save"),
                           ),
                         ),
+
                       if (_isEditing) const SizedBox(height: 20),
 
                       /// SETTINGS
@@ -189,6 +254,7 @@ class _ManagerProfileState extends State<ManagerProfile> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 10),
 
                       _settingsItem(
@@ -208,7 +274,6 @@ class _ManagerProfileState extends State<ManagerProfile> {
     );
   }
 
-  /// FIELD
   Widget _field(
     String label,
     TextEditingController controller,
@@ -235,7 +300,6 @@ class _ManagerProfileState extends State<ManagerProfile> {
     );
   }
 
-  /// SETTINGS ITEM
   Widget _settingsItem({
     required IconData icon,
     required String title,

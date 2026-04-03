@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../theme/app_theme.dart';
 import '../passenger/passengerHomeScreen.dart';
+import '../Driver/DriverHomeScreen.dart';
 import '../../models/driver.dart';
 import 'SignupApproval.dart';
 
@@ -27,156 +29,211 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final List<TextEditingController> _otpControllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    for (var c in _otpControllers) c.dispose();
-    for (var f in _focusNodes) f.dispose();
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
- void _onContinue() async {
-  String otp = _otpControllers.map((e) => e.text).join();
+  Future<void> _handleDriverFlow({
+    required String uid,
+    required String firstName,
+    required String lastName,
+  }) async {
+    final driverInfo = widget.driverData ?? {};
 
-  if (otp.length != 6) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter a valid 6-digit OTP")));
-    return;
-  }
-
-  try {
-    // 1️⃣ Verify OTP
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-      verificationId: widget.verificationId,
-      smsCode: otp,
+    final driver = DriverModel(
+      userId: uid,
+      firstName: firstName,
+      lastName: lastName,
+      phone: widget.phoneNumber,
+      image: null,
+      role: "driver",
+      isVerified: true,
+      vehicle: driverInfo['vehicle'] ?? '',
+      route: driverInfo['route'] ?? '',
+      availability: driverInfo['availability'] ?? true,
+      licenseNumber: driverInfo['licenseNumber'] ?? '',
+      isApproved: driverInfo['isApproved'] ?? false,
     );
 
-    UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-    String uid = userCredential.user!.uid;
-
-    // 2️⃣ Split full name
-    String firstName = "";
-    String lastName = "";
-    if (widget.fullName != null && widget.fullName!.isNotEmpty) {
-      List<String> names = widget.fullName!.split(" ");
-      firstName = names.isNotEmpty ? names[0] : "";
-      lastName = names.length > 1 ? names[1] : "";
-    }
-
-    // 3️⃣ Prepare user data
-    Map<String, dynamic> userData = {
-      "userId": uid,
-      "phone": widget.phoneNumber,
-      "image": null,
-      "isVerified": true,
-    };
-
-    if (widget.fullName != null) {
-      userData["firstName"] = firstName;
-      userData["lastName"] = lastName;
-    }
-
-    if (widget.role != null) {
-      userData["role"] = widget.role;
-    }
-
-    // 4️⃣ Save user document
     await FirebaseFirestore.instance
-        .collection('users')
+        .collection('drivers')
         .doc(uid)
-        .set(userData, SetOptions(merge: true));
-    debugPrint("✅ User saved/updated in 'users': $uid");
+        .set(driver.toDriverMap(), SetOptions(merge: true));
 
-    // 5️⃣ Passenger signup
-    if (widget.role == "passenger") {
-      await FirebaseFirestore.instance
-          .collection('passengers')
-          .doc(uid)
-          .set({
-        "tripHistory": [],
-        "paymentMethods": [],
-      }, SetOptions(merge: true));
-      debugPrint("✅ Passenger document created: $uid");
-
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (_) => const PassengerHomeScreen()));
-      return;
-    }
-
-    // 6️⃣ Driver signup – always attempt to add/update driver
-    // 6️⃣ Driver signup – like passenger (clean separation)
-if (widget.role == "driver") {
-  Map<String, dynamic> driverInfo = widget.driverData ?? {};
-
-  final driver = DriverModel(
-    userId: uid,
-    firstName: firstName,
-    lastName: lastName,
-    phone: widget.phoneNumber,
-    image: null,
-    role: "driver",
-    isVerified: true,
-    vehicle: driverInfo['vehicle'] ?? '',
-    route: driverInfo['route'] ?? '',
-    availability: driverInfo['availability'] ?? true,
-    licenseNumber: driverInfo['licenseNumber'] ?? '',
-  );
-
-  // ✅ Save ONLY driver fields (LIKE passenger)
-  await FirebaseFirestore.instance
-      .collection('drivers')
-      .doc(uid)
-      .set(driver.toDriverMap(), SetOptions(merge: true));
-
-  debugPrint("✅ Driver data saved (ONLY driver fields)");
-
-  Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-          builder: (_) => const SignupApprovalScreen()));
-  return;
-}
-
-    // 7️⃣ Existing user login flow
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('users')
+    final driverDoc = await FirebaseFirestore.instance
+        .collection('drivers')
         .doc(uid)
         .get();
 
-    String role = userDoc.get("role");
+    final bool isApproved = driverDoc.data()?['isApproved'] ?? false;
 
-    if (role == "passenger") {
+    if (!mounted) return;
+
+    if (isApproved) {
       Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (_) => const PassengerHomeScreen()));
-    } else if (role == "driver") {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (_) => const SignupApprovalScreen()));
+        context,
+        MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User role not found")),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const SignupApprovalScreen()),
       );
     }
-  } catch (e) {
-    debugPrint("❌ OTP verification or Firestore error: $e");
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Error: $e")));
   }
-}
+
+  Future<void> _onContinue() async {
+    final otp = _otpControllers.map((e) => e.text).join().trim();
+
+    if (otp.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enter a valid 6-digit OTP")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: widget.verificationId,
+        smsCode: otp,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+
+      final uid = userCredential.user!.uid;
+
+      String firstName = "";
+      String lastName = "";
+
+      if (widget.fullName != null && widget.fullName!.trim().isNotEmpty) {
+        final names = widget.fullName!.trim().split(" ");
+        firstName = names.isNotEmpty ? names.first : "";
+        lastName = names.length > 1 ? names.sublist(1).join(" ") : "";
+      }
+
+      final Map<String, dynamic> userData = {
+        "userId": uid,
+        "phone": widget.phoneNumber,
+        "image": null,
+        "isVerified": true,
+      };
+
+      if (widget.fullName != null && widget.fullName!.trim().isNotEmpty) {
+        userData["firstName"] = firstName;
+        userData["lastName"] = lastName;
+      }
+
+      if (widget.role != null) {
+        userData["role"] = widget.role;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set(userData, SetOptions(merge: true));
+
+      if (widget.role == "passenger") {
+        await FirebaseFirestore.instance.collection('passengers').doc(uid).set({
+          "tripHistory": [],
+          "paymentMethods": [],
+        }, SetOptions(merge: true));
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PassengerHomeScreen()),
+        );
+        return;
+      }
+
+      if (widget.role == "driver") {
+        await _handleDriverFlow(
+          uid: uid,
+          firstName: firstName,
+          lastName: lastName,
+        );
+        return;
+      }
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      final role = userDoc.data()?['role'];
+
+      if (!mounted) return;
+
+      if (role == "passenger") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PassengerHomeScreen()),
+        );
+      } else if (role == "driver") {
+        final driverDoc = await FirebaseFirestore.instance
+            .collection('drivers')
+            .doc(uid)
+            .get();
+
+        final bool isApproved = driverDoc.data()?['isApproved'] ?? false;
+
+        if (!mounted) return;
+
+        if (isApproved) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const SignupApprovalScreen()),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("User role not found")));
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Verification failed")),
+      );
+    } catch (e) {
+      debugPrint("OTP verification error: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   void _resendCode() {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Resend not implemented yet")));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Resend not implemented yet")));
   }
 
   Widget _buildOtpTextField(int index) {
@@ -244,7 +301,9 @@ if (widget.role == "driver") {
                     constraints: const BoxConstraints(maxWidth: 450),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 32, horizontal: 24),
+                        vertical: 32,
+                        horizontal: 24,
+                      ),
                       decoration: NavigoDecorations.kCardDecoration,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -263,7 +322,9 @@ if (widget.role == "driver") {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(
-                                6, (index) => _buildOtpTextField(index)),
+                              6,
+                              (index) => _buildOtpTextField(index),
+                            ),
                           ),
                           const SizedBox(height: 20),
                           Row(
@@ -287,18 +348,29 @@ if (widget.role == "driver") {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: _onContinue,
-                              style:
-                                  NavigoDecorations.kPrimaryButtonLargeStyle,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text("Continue",
-                                      style: NavigoTextStyles.button),
-                                  SizedBox(width: 10),
-                                  Icon(Icons.arrow_forward),
-                                ],
-                              ),
+                              onPressed: _isLoading ? null : _onContinue,
+                              style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        Text(
+                                          "Continue",
+                                          style: NavigoTextStyles.button,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Icon(Icons.arrow_forward),
+                                      ],
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 12),

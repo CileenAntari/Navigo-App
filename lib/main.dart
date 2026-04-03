@@ -9,13 +9,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase in the background
-  Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  ).then((_) {
-    print("Firebase initialized successfully");
-  }).catchError((e) {
-    print("Firebase initialization failed: $e");
-  });
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+      .then((_) {
+        print("Firebase initialized successfully");
+      })
+      .catchError((e) {
+        print("Firebase initialization failed: $e");
+      });
 
   // Run the app immediately
   runApp(const MyApp());
@@ -78,10 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/logo.png",
-                  width: 220,
-                ),
+                Image.asset("assets/images/logo.png", width: 220),
                 const SizedBox(height: 20),
                 const Text(
                   "Navigo وصلني",

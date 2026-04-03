@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../theme/app_theme.dart';
 import 'OtpVerificationScreen.dart';
 import 'email_login.dart';
 
 class PhoneNumberScreen extends StatefulWidget {
-  const PhoneNumberScreen({super.key});
+  final String? fullName;
+  final String? role;
+  final Map<String, dynamic>? driverData;
+
+  const PhoneNumberScreen({
+    super.key,
+    this.fullName,
+    this.role,
+    this.driverData,
+  });
 
   @override
   State<PhoneNumberScreen> createState() => _PhoneNumberScreenState();
@@ -13,14 +23,10 @@ class PhoneNumberScreen extends StatefulWidget {
 
 class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   final TextEditingController _phoneController = TextEditingController();
+  bool _isSending = false;
 
-  // Optional: store full name & role if coming from signup
-  String? fullName;
-  String? role; // "passenger" or "driver"
-  Map<String, dynamic>? driverData;
-
-  void _sendOtp() async {
-    String phoneNumber = _phoneController.text.trim();
+  Future<void> _sendOtp() async {
+    final phoneNumber = _phoneController.text.trim();
 
     if (phoneNumber.isEmpty) {
       ScaffoldMessenger.of(
@@ -29,36 +35,57 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       return;
     }
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto login (optional)
-        await FirebaseAuth.instance.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        if (!mounted) return;
+    setState(() => _isSending = true);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(
-              phoneNumber: phoneNumber,
-              verificationId: verificationId,
-              fullName: fullName, // Pass full name if exists
-              role: role, // Pass role if exists
-              driverData: driverData, // Pass driver info if exists
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Leave empty to keep one clear flow through OTP screen.
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          if (!mounted) return;
+          setState(() => _isSending = false);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          if (!mounted) return;
+
+          setState(() => _isSending = false);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => OtpVerificationScreen(
+                phoneNumber: phoneNumber,
+                verificationId: verificationId,
+                fullName: widget.fullName,
+                role: widget.role,
+                driverData: widget.driverData,
+              ),
             ),
-          ),
-        );
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          if (!mounted) return;
+          setState(() => _isSending = false);
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to send OTP: $e")));
+    }
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,10 +96,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            /// Top Bar
             NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
-
-            /// Centered Body
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -97,8 +121,6 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               style: NavigoTextStyles.bodyMedium,
                             ),
                             const SizedBox(height: 20),
-
-                            /// Phone Field
                             const Text(
                               "Phone number",
                               style: NavigoTextStyles.label,
@@ -113,51 +135,56 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                               ),
                               decoration: NavigoDecorations.kInputDecoration
                                   .copyWith(
-                                hintText: "e.g. +97059 000 0000",
-                                prefixIcon: const Icon(
-                                  Icons.phone_outlined,
-                                  color: Colors.green,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () => _phoneController.clear(),
-                                ),
-                              ),
+                                    hintText: "e.g. +97059XXXXXXXX",
+                                    prefixIcon: const Icon(
+                                      Icons.phone_outlined,
+                                      color: Colors.green,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () => _phoneController.clear(),
+                                    ),
+                                  ),
                             ),
                             const SizedBox(height: 25),
-
-                            /// Send OTP Button
                             SizedBox(
                               width: double.infinity,
                               height: 55,
                               child: ElevatedButton(
                                 style:
                                     NavigoDecorations.kPrimaryButtonLargeStyle,
-                                onPressed: _sendOtp,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Text(
-                                      "Send Verification Code",
-                                      style: NavigoTextStyles.button,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Icon(Icons.arrow_forward),
-                                  ],
-                                ),
+                                onPressed: _isSending ? null : _sendOtp,
+                                child: _isSending
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          Text(
+                                            "Send Verification Code",
+                                            style: NavigoTextStyles.button,
+                                          ),
+                                          SizedBox(width: 10),
+                                          Icon(Icons.arrow_forward),
+                                        ],
+                                      ),
                               ),
                             ),
                             const SizedBox(height: 10),
-
-                            /// Email Login
                             Center(
                               child: TextButton(
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const EmailLoginScreen(),
+                                      builder: (_) => const EmailLoginScreen(),
                                     ),
                                   );
                                 },

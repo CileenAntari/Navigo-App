@@ -4,6 +4,7 @@ import 'role.dart';
 import '../authentication/PhoneNumberScreen.dart';
 import '../passenger/passengerhomescreen.dart';
 import 'package:navigo/screens/route_manager/RouteSchedule.dart';
+import 'package:navigo/screens/Driver/DriverHomeScreen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -118,6 +119,25 @@ class OnboardingScreen extends StatelessWidget {
               ),
             ),
           ),
+
+          /// ✨ Continue as driver (Guest)
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DriverHomeScreen()),
+              );
+            },
+            child: Text(
+              'Continue as guest',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+
 
           /// ✨ Continue as route manager (Guest)
           GestureDetector(
