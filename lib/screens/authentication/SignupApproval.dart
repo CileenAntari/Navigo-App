@@ -24,7 +24,7 @@ class SignupApprovalScreen extends StatelessWidget {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
+                      color: NavigoColors.successLight,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: NavigoColors.accentGreen,
@@ -57,7 +57,7 @@ class SignupApprovalScreen extends StatelessWidget {
                   // Button
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: NavigoSizes.buttonHeightLarge,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(

@@ -246,9 +246,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 16,
+        style: NavigoTextStyles.fieldText.copyWith(
           fontWeight: FontWeight.bold,
         ),
         decoration: InputDecoration(
@@ -346,7 +344,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
-                            height: 52,
+                            height: NavigoSizes.buttonHeight,
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _onContinue,
                               style: NavigoDecorations.kPrimaryButtonLargeStyle,
@@ -356,7 +354,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                       height: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.white,
+                                        color: NavigoColors.textLight,
                                       ),
                                     )
                                   : Row(
@@ -383,11 +381,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             onTap: () => Navigator.pop(context),
                             child: const Text(
                               "Change phone number",
-                              style: TextStyle(
-                                color: NavigoColors.accentGreen,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                              style: NavigoTextStyles.actionLink,
                             ),
                           ),
                         ],

@@ -82,7 +82,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 const SizedBox(height: 20),
                 const Text(
                   "Navigo وصلني",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: NavigoColors.textDark,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(

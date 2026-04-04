@@ -31,7 +31,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      userDocRef = FirebaseFirestore.instance.collection('users').doc(currentUser!.uid);
+      userDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid);
       _loadUserData();
     }
   }
@@ -41,7 +43,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       DocumentSnapshot snapshot = await userDocRef.get();
       if (snapshot.exists) {
         final data = snapshot.data() as Map<String, dynamic>;
-        _nameController.text = "${data['firstName'] ?? ''} ${data['lastName'] ?? ''}";
+        _nameController.text =
+            "${data['firstName'] ?? ''} ${data['lastName'] ?? ''}";
         _phoneController.text = data['phone'] ?? '';
       }
     } catch (e) {
@@ -113,14 +116,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // If you implement image upload, include a field "image": downloadUrl
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Profile updated")));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update profile: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to update profile: $e")));
     }
+  }
+
+  Widget _buildProfileImage({
+    BoxFit fit = BoxFit.cover,
+    double? width,
+    double? height,
+  }) {
+    final imageProvider = _image != null
+        ? FileImage(_image!)
+        : const AssetImage("assets/images/logo.png") as ImageProvider;
+
+    return Image(image: imageProvider, fit: fit, width: width, height: height);
   }
 
   @override
@@ -149,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: _toggleEdit,
                     icon: Icon(
                       _isEditing ? Icons.close : Icons.edit,
-                      color: NavigoColors.primaryOrange,
+                      color: NavigoColors.accentGreen,
                     ),
                   ),
                 ],
@@ -170,10 +185,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           CircleAvatar(
                             radius: 50,
-                            backgroundImage: _image != null
-                                ? FileImage(_image!)
-                                : const AssetImage("assets/images/logo.png")
-                                    as ImageProvider,
+                            backgroundColor: NavigoColors.surfaceWhite,
+                            child: ClipOval(
+                              child: _buildProfileImage(
+                                fit: BoxFit.contain,
+                                width: 80,
+                                height: 80,
+                              ),
+                            ),
                           ),
                           if (_isEditing)
                             Positioned(
@@ -183,14 +202,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 onTap: _showImagePicker,
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: NavigoColors.primaryOrange,
-                                    shape: BoxShape.circle,
-                                  ),
+                                  decoration:
+                                      NavigoDecorations.iconCircleDecoration(
+                                        NavigoColors.accentGreen,
+                                      ),
                                   child: const Icon(
                                     Icons.camera_alt,
                                     size: 16,
-                                    color: Colors.white,
+                                    color: NavigoColors.textLight,
                                   ),
                                 ),
                               ),
@@ -262,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _settingsItem(
                         icon: Icons.logout,
                         title: "Log out",
-                        color: Colors.red,
+                        color: NavigoColors.accentRed,
                         onTap: _logout,
                       ),
                     ],
@@ -291,12 +310,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         TextField(
           controller: controller,
           enabled: enabled,
-          style: const TextStyle(
+          style: NavigoTextStyles.bodyMedium.copyWith(
             color: NavigoColors.textDark,
             fontWeight: FontWeight.w500,
           ),
           decoration: NavigoDecorations.kInputDecoration.copyWith(
-            prefixIcon: Icon(icon, color: NavigoColors.primaryOrange),
+            prefixIcon: Icon(icon, color: NavigoColors.accentGreen),
           ),
         ),
       ],
@@ -307,14 +326,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.black,
+    Color color = NavigoColors.textDark,
   }) {
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: color),
       title: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.w500, color: color),
+        style: NavigoTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
       ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
     );

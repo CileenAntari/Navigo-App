@@ -92,9 +92,7 @@ class OnboardingScreen extends StatelessWidget {
             },
             child: Text(
               'Sign in',
-              style: NavigoTextStyles.button.copyWith(
-                color: NavigoColors.accentGreen,
-              ),
+              style: NavigoTextStyles.actionLink,
             ),
           ),
 
@@ -112,9 +110,7 @@ class OnboardingScreen extends StatelessWidget {
             },
             child: Text(
               'Continue as guest',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 13,
+              style: NavigoTextStyles.bodySmall.copyWith(
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -130,9 +126,7 @@ class OnboardingScreen extends StatelessWidget {
             },
             child: Text(
               'Continue as guest',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 13,
+              style: NavigoTextStyles.bodySmall.copyWith(
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -149,9 +143,7 @@ class OnboardingScreen extends StatelessWidget {
             },
             child: Text(
               'Continue as guest',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 13,
+              style: NavigoTextStyles.bodySmall.copyWith(
                 decoration: TextDecoration.underline,
               ),
             ),

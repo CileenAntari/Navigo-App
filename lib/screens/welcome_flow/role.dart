@@ -42,7 +42,7 @@ class RoleSelectionScreen extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: NavigoColors.surfaceWhite,
                 borderRadius: BorderRadius.circular(12),
                 //border: Border.all(color: NavigoColors.accentGreen, width: 2),
               ),
@@ -53,14 +53,7 @@ class RoleSelectionScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text(title, style: NavigoTextStyles.titleSmall),
                   const SizedBox(height: 4),
                   Text(description, style: NavigoTextStyles.bodyMedium),
                 ],
@@ -139,9 +132,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       },
                       child: Text(
                         "Sign in",
-                        style: NavigoTextStyles.button.copyWith(
-                          color: NavigoColors.accentGreen,
-                        ),
+                        style: NavigoTextStyles.actionLink,
                       ),
                     ),
                   ],

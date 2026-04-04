@@ -140,16 +140,13 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                             controller: _nameController,
                             keyboardType: TextInputType.name,
                             // ← Forces black text in the name field
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
+                            style: NavigoTextStyles.fieldText,
                             decoration: NavigoDecorations.kInputDecoration
                                 .copyWith(
                                   hintText: "e.g. Cileen Antari",
                                   prefixIcon: const Icon(
                                     Icons.person_outline,
-                                    color: Colors.green,
+                                    color: NavigoColors.accentGreen,
                                   ),
                                   suffixIcon: IconButton(
                                     icon: const Icon(Icons.clear),
@@ -169,16 +166,13 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
                             // ← Forces black text in the phone field
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
+                            style: NavigoTextStyles.fieldText,
                             decoration: NavigoDecorations.kInputDecoration
                                 .copyWith(
                                   hintText: "+97059 000 0000",
                                   prefixIcon: const Icon(
                                     Icons.phone_outlined,
-                                    color: Colors.green,
+                                    color: NavigoColors.accentGreen,
                                   ),
                                   suffixIcon: IconButton(
                                     icon: const Icon(Icons.clear),
@@ -205,9 +199,9 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                               Expanded(
                                 child: RichText(
                                   text: TextSpan(
-                                    style: const TextStyle(
+                                    style: NavigoTextStyles.bodyMedium.copyWith(
+                                      color: NavigoColors.textDark,
                                       fontSize: 13,
-                                      color: Colors.black,
                                     ),
                                     children: [
                                       const TextSpan(text: "I agree to "),
@@ -241,7 +235,7 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                           /// Create Account Button
                           SizedBox(
                             width: double.infinity,
-                            height: 55,
+                            height: NavigoSizes.buttonHeightLarge,
                             child: ElevatedButton(
                               style: NavigoDecorations.kPrimaryButtonLargeStyle,
                               onPressed: (_agreeToTerms && !_isLoading)
@@ -252,7 +246,7 @@ class _PassengerSignupScreenState extends State<PassengerSignupScreen> {
                                       height: 24,
                                       width: 24,
                                       child: CircularProgressIndicator(
-                                        color: Colors.white,
+                                        color: NavigoColors.textLight,
                                         strokeWidth: 2,
                                       ),
                                     )

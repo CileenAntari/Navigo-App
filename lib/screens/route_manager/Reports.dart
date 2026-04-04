@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:navigo/screens/route_manager/RouteSchedule.dart';
 import 'RouteManagerNavBar.dart';
+import 'package:navigo/theme/app_theme.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -16,19 +18,19 @@ class _ReportsState extends State<Reports> {
       "from": "Lara Shaltal",
       "date": "28 Mar",
       "message":
-          "The bus was overcrowded and the driver skipped my stop. Please look into this issue."
+          "The bus was overcrowded and the driver skipped my stop. Please look into this issue.",
     },
     {
       "from": "Omar Saleh",
       "date": "10 Mar",
       "message":
-          "I faced a problem with the bus timing today. The trip was delayed for more than 30 minutes."
+          "I faced a problem with the bus timing today. The trip was delayed for more than 30 minutes.",
     },
     {
       "from": "Ahmad Khaled",
       "date": "28 Jan",
       "message":
-          "I would like to report that the bus arrived very late today and the driver did not follow the scheduled route."
+          "I would like to report that the bus arrived very late today and the driver did not follow the scheduled route.",
     },
   ];
 
@@ -52,25 +54,20 @@ class _ReportsState extends State<Reports> {
   void sendToAdmin() {
     final selectedReports = <Map<String, String>>[];
     for (int i = 0; i < filteredReports.length; i++) {
-      if (selected[i]) {
-        selectedReports.add(filteredReports[i]);
-      }
+      if (selected[i]) selectedReports.add(filteredReports[i]);
     }
 
     if (selectedReports.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No reports selected!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("No reports selected!")));
     } else {
       for (var report in selectedReports) {
         print("Sent report from ${report["from"]} to admin.");
       }
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Reports sent to admin successfully!")),
       );
-
-      // Clear selection
       setState(() {
         selected = List<bool>.filled(allReports.length, false);
       });
@@ -82,108 +79,125 @@ class _ReportsState extends State<Reports> {
     final reports = filteredReports;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: NavigoColors.backgroundLight,
+
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              /// Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// TOP BAR
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const RouteSchedule()),
+              ),
+            ),
+
+            /// TITLE
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavigoSizes.screenPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Reports",
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Image.asset('assets/images/logo.png'),
-                    ),
+                  Text("Reports", style: NavigoTextStyles.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Review and forward passenger reports",
+                    style: NavigoTextStyles.bodySmall,
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+            ),
 
-              /// Search Box
-              TextField(
+            const SizedBox(height: NavigoSizes.sectionGap),
+
+            /// SEARCH BOX
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavigoSizes.screenPadding,
+              ),
+              child: TextField(
                 controller: searchController,
-                decoration: InputDecoration(
-                  hintText: "Search (Date/Name)",
-                  prefixIcon: const Icon(Icons.search),
+                style: NavigoTextStyles.fieldText,
+                decoration: NavigoDecorations.kInputDecoration.copyWith(
+                  hintText: "Search by name or date...",
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: NavigoColors.surfaceWhite,
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: NavigoColors.accentGreen, // ✅ green icon
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
                   ),
                 ),
-                onChanged: (_) {
-                  setState(() {});
-                },
+                onChanged: (_) => setState(() {}),
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: NavigoSizes.sectionGap),
 
-              /// Reports List
-              Expanded(
+            /// REPORTS LIST — Expanded so it fills remaining space
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NavigoSizes.screenPadding,
+                ),
                 child: ListView.builder(
                   itemCount: reports.length,
                   itemBuilder: (context, index) {
                     final report = reports[index];
+
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                      margin: const EdgeInsets.only(
+                        bottom: NavigoSizes.itemGap,
                       ),
+                      padding: const EdgeInsets.all(NavigoSizes.cardPadding),
+                      decoration: NavigoDecorations.kCardDecoration,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          /// CHECKBOX
                           Checkbox(
                             value: selected[index],
+                            activeColor: NavigoColors.primaryOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                             onChanged: (value) {
-                              setState(() {
-                                selected[index] = value!;
-                              });
+                              setState(() => selected[index] = value!);
                             },
                           ),
+
                           const SizedBox(width: 8),
+
+                          /// REPORT CONTENT
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "From: ${report["from"]}",
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
+                                  style: NavigoTextStyles.titleSmall,
                                 ),
                                 const SizedBox(height: 6),
-                                Text(report["message"]!),
+                                Text(
+                                  report["message"]!,
+                                  style: NavigoTextStyles.bodyMedium,
+                                ),
                               ],
                             ),
                           ),
+
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              report["date"]!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+
+                          /// DATE CHIP
+                          NavigoDecorations.statusChip(
+                            label: report["date"]!,
+                            color: NavigoColors.accentGreen,
                           ),
                         ],
                       ),
@@ -191,25 +205,29 @@ class _ReportsState extends State<Reports> {
                   },
                 ),
               ),
+            ),
 
-              /// Send Button
-              ElevatedButton(
-                onPressed: sendToAdmin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  minimumSize: const Size(double.infinity, 50),
+            /// SEND BUTTON — pinned at bottom
+            Padding(
+              padding: const EdgeInsets.all(NavigoSizes.screenPadding),
+              child: SizedBox(
+                width: double.infinity,
+                height: NavigoSizes.buttonHeight,
+                child: ElevatedButton(
+                  onPressed: sendToAdmin,
+                  style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                  child: const Text(
+                    "Send to Admin",
+                    style: NavigoTextStyles.button,
+                  ),
                 ),
-                child: const Text("Send to Admin"),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
 
-      /// Navigation Bar
-      bottomNavigationBar: const RouteManagerNavBar(
-        currentIndex: 2, // Reports tab
-      ),
+      bottomNavigationBar: const RouteManagerNavBar(currentIndex: 2),
     );
   }
 }

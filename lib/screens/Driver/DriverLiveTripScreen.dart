@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Driver/DriverTripsScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../theme/app_theme.dart';
+import '../Driver/DriverTripsScreen.dart';
 import 'DriverBottomNavBar.dart';
+import 'DriverHomeScreen.dart';
 
 class DriverLiveTripScreen extends StatefulWidget {
   const DriverLiveTripScreen({super.key});
@@ -40,7 +41,7 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
         LatLng(31.9038, 35.2034),
       ],
       width: 5,
-      color: Colors.orange,
+      color: NavigoColors.primaryOrange,
     ),
   };
 
@@ -56,7 +57,6 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
   void initState() {
     super.initState();
     _loadDriverData();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getUserLocation();
     });
@@ -71,22 +71,18 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
   Future<void> _loadDriverData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-
       if (user == null) {
         setState(() => _driverName = "Driver");
         return;
       }
-
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
         final firstName = data['firstName'] ?? '';
         final lastName = data['lastName'] ?? '';
-
         setState(() {
           _driverName = "$firstName $lastName".trim().isEmpty
               ? "Driver"
@@ -101,23 +97,19 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
   Future<void> _getUserLocation() async {
     if (_isLocating) return;
     setState(() => _isLocating = true);
-
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-
+      var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-
       if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
+          permission == LocationPermission.deniedForever)
         return;
-      }
 
-      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return;
 
-      Position position =
+      final position =
           await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           ).timeout(
@@ -128,10 +120,8 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
       if (!mounted) return;
 
       final newPosition = LatLng(position.latitude, position.longitude);
-
       setState(() {
         _initialPosition = newPosition;
-
         _markers.add(
           Marker(
             markerId: const MarkerId("driver_location"),
@@ -153,12 +143,6 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
     }
   }
 
-  void _endTrip() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Trip ended")));
-  }
-
   void _openFullScreenMap() {
     Navigator.push(
       context,
@@ -178,300 +162,249 @@ class _DriverLiveTripScreenState extends State<DriverLiveTripScreen> {
       backgroundColor: NavigoColors.backgroundLight,
       bottomNavigationBar: const DriverBottomNavBar(currentIndex: 1),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            children: [
-              /// HEADER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── TOP BAR ─────────────────────────────────────
+            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
+
+            // ── HEADER ──────────────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Live Trip",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: NavigoColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Navigate and update progress",
-                        style: NavigoTextStyles.bodySmall.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: NavigoColors.textGray,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: ClipOval(
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          fit: BoxFit.contain,
-                          width: 26,
-                          height: 26,
-                        ),
-                      ),
-                    ),
+                  Text("Live Trip", style: NavigoTextStyles.titleLarge),
+                  SizedBox(height: 2),
+                  Text(
+                    "Navigate and update progress",
+                    style: NavigoTextStyles.bodySmall,
                   ),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 14),
+            const SizedBox(height: 14),
 
-              /// MAP CARD
-              Container(
-                height: 250,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
+            // ── REST OF CONTENT ──────────────────────────────
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
                   children: [
-                    GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: _initialPosition,
-                        zoom: 13.8,
+                    // ── MAP ─────────────────────────────────
+                    Container(
+                      height: 250,
+                      width: double.infinity,
+                      decoration: NavigoDecorations.surfaceDecoration(
+                        radius: 22,
+                        bordered: false,
                       ),
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
-                      markers: _markers,
-                      polylines: _polylines,
-                      onMapCreated: (controller) => _mapController = controller,
-                    ),
-
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.92),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "Live navigation",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w700,
-                            fontStyle: FontStyle.italic,
-                            fontSize: 12,
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: [
+                          GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: _initialPosition,
+                              zoom: 13.8,
+                            ),
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            markers: _markers,
+                            polylines: _polylines,
+                            onMapCreated: (controller) =>
+                                _mapController = controller,
                           ),
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      top: 10,
-                      right: 54,
-                      child: GestureDetector(
-                        onTap: _openFullScreenMap,
-                        child: const CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.fullscreen,
-                            color: NavigoColors.primaryOrange,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: _isLocating
-                          ? const CircleAvatar(
-                              radius: 18,
-                              backgroundColor: Colors.white,
-                              child: SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                          Positioned(
+                            top: 10,
+                            left: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 7,
+                              ),
+                              decoration: NavigoDecorations.surfaceDecoration(
+                                radius: 20,
+                                color: NavigoColors.surfaceWhite.withOpacity(
+                                  0.92,
+                                ),
+                                bordered: false,
+                              ),
+                              child: Text(
+                                "Live navigation",
+                                style: NavigoTextStyles.bodySmall.copyWith(
+                                  color: NavigoColors.accentGreen,
+                                  fontWeight: FontWeight.w700,
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
                                 ),
                               ),
-                            )
-                          : GestureDetector(
-                              onTap: _getUserLocation,
+                            ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 54,
+                            child: GestureDetector(
+                              onTap: _openFullScreenMap,
                               child: const CircleAvatar(
                                 radius: 18,
-                                backgroundColor: Colors.white,
+                                backgroundColor: NavigoColors.surfaceWhite,
                                 child: Icon(
-                                  Icons.my_location,
+                                  Icons.fullscreen,
                                   color: NavigoColors.primaryOrange,
-                                  size: 18,
+                                  size: 20,
                                 ),
                               ),
                             ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: _isLocating
+                                ? const CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: NavigoColors.surfaceWhite,
+                                    child: SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : GestureDetector(
+                                    onTap: _getUserLocation,
+                                    child: const CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor:
+                                          NavigoColors.surfaceWhite,
+                                      child: Icon(
+                                        Icons.my_location,
+                                        color: NavigoColors.primaryOrange,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
 
-              const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-              /// TRIP INFO CARD
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// first row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "To: $destination",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              fontStyle: FontStyle.italic,
-                              color: NavigoColors.textDark,
-                            ),
+                    // ── TRIP INFO CARD ───────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "To: $destination",
+                                  style: NavigoTextStyles.titleSmall.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                              NavigoDecorations.statusChip(
+                                label: status,
+                                color: NavigoColors.accentGreen,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.10),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Text(
-                            status,
-                            style: const TextStyle(
-                              color: Colors.green,
+                          const SizedBox(height: 6),
+                          Text(
+                            "ETA $eta • $price NIS",
+                            style: NavigoTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w700,
                               fontStyle: FontStyle.italic,
-                              fontSize: 12,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Text(
-                      "ETA $eta • $price NIS",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        fontStyle: FontStyle.italic,
-                        color: NavigoColors.textGray,
+                          const SizedBox(height: 10),
+                          Divider(
+                            color: NavigoColors.primaryOrange.withOpacity(0.3),
+                            height: 12,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Next stop",
+                            style: NavigoTextStyles.bodySmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontStyle: FontStyle.italic,
+                              color: NavigoColors.accentGreen,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            nextStop,
+                            style: NavigoTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: tripProgress,
+                              minHeight: 7,
+                              backgroundColor: NavigoColors.borderLight,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                NavigoColors.primaryOrange,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
                     const SizedBox(height: 14),
 
-                    const Text(
-                      "Next stop",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.green,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      nextStop,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        fontStyle: FontStyle.italic,
-                        color: NavigoColors.textGray,
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: tripProgress,
-                        minHeight: 7,
-                        backgroundColor: Colors.grey.shade300,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.orange,
+                    // ── END TRIP BUTTON ──────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: NavigoSizes.buttonHeight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const DriverTripsScreen(),
+                            ),
+                          );
+                        },
+                        style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                        child: const Text(
+                          "End Trip",
+                          style: NavigoTextStyles.button,
                         ),
                       ),
                     ),
+
+                    const Spacer(),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 14),
-
-              /// END TRIP BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DriverTripsScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "End trip",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-
-              const Spacer(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
+// ── FULL SCREEN MAP ───────────────────────────────────────────────────────────
 class FullScreenMapView extends StatefulWidget {
   final LatLng initialPosition;
   final Set<Marker> markers;
@@ -517,14 +450,10 @@ class _FullScreenMapViewState extends State<FullScreenMapView> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
+              child: NavigoDecorations.topBar(
+                onBack: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
                 ),
               ),
             ),

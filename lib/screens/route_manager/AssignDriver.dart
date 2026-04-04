@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:navigo/screens/route_manager/RouteSchedule.dart';
 import 'RouteManagerNavBar.dart';
+import 'package:navigo/theme/app_theme.dart';
 
 class AssignDriver extends StatefulWidget {
   const AssignDriver({super.key});
@@ -44,184 +46,170 @@ class _AssignDriverState extends State<AssignDriver> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.grey[100],
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: NavigoColors.backgroundLight,
 
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// HEADER
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Assignments",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(3),
-                    child: Image.asset('assets/images/logo.png'),
-                  ),
-                ),
-              ],
+            /// TOP BAR (back arrow + logo)
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const RouteSchedule()),
+              ),
             ),
 
-            const SizedBox(height: 10),
-
-            const Text(
-              "Assign drivers & vehicles",
-              style: TextStyle(color: Colors.grey),
+            /// TITLE + SUBTITLE
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavigoSizes.screenPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Assignments", style: NavigoTextStyles.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Assign drivers & vehicles",
+                    style: NavigoTextStyles.bodySmall,
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: NavigoSizes.sectionGap),
 
             /// FILTERS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                filterChip("All"),
-                filterChip("Available"),
-                filterChip("On Trip"),
-                filterChip("Offline"),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavigoSizes.screenPadding,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: ["All", "Available", "On Trip", "Offline"]
+                    .map(
+                      (label) => NavigoDecorations.selectorChip(
+                        label: label,
+                        selected: selectedFilter == label,
+                        onTap: () => setState(() => selectedFilter = label),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: NavigoSizes.sectionGap),
 
             /// LIST
             Expanded(
-              child: ListView.builder(
-                itemCount: filteredDrivers.length,
-                itemBuilder: (context, index) {
-                  final driver = filteredDrivers[index];
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NavigoSizes.screenPadding,
+                ),
+                child: ListView.builder(
+                  itemCount: filteredDrivers.length,
+                  itemBuilder: (context, index) {
+                    final driver = filteredDrivers[index];
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(driver["name"]!,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 6),
-                            Text(driver["vehicle"]!),
-                            const SizedBox(height: 6),
-                            Text("Assigned: ${driver["line"]}"),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            statusChip(driver["status"]!),
-                            const SizedBox(height: 8),
-                            if (driver["status"] == "Available")
-                              // 🔹 BEAUTIFUL ASSIGN BUTTON
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  elevation: 4,
-                                  shadowColor: Colors.orange.withOpacity(0.5),
-                                ),
-                                child: const Text(
-                                  "Assign",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                    return Container(
+                      margin: const EdgeInsets.only(
+                        bottom: NavigoSizes.itemGap,
+                      ),
+                      padding: const EdgeInsets.all(NavigoSizes.cardPadding),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          /// LEFT — Driver info
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                driver["name"]!,
+                                style: NavigoTextStyles.titleSmall,
                               ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                              const SizedBox(height: 6),
+                              Text(
+                                driver["vehicle"]!,
+                                style: NavigoTextStyles.bodyMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Assigned: ${driver["line"]}",
+                                style: NavigoTextStyles.label,
+                              ),
+                            ],
+                          ),
+
+                          /// RIGHT — Status + action
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _statusChip(driver["status"]!),
+                              if (driver["status"] == "Available") ...[
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () {},
+                                  style: NavigoDecorations
+                                      .kPrimaryButtonLargeStyle
+                                      .copyWith(
+                                        padding: const WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 10,
+                                          ),
+                                        ),
+                                        elevation: const WidgetStatePropertyAll(
+                                          4,
+                                        ),
+                                        shadowColor: WidgetStatePropertyAll(
+                                          NavigoColors.primaryOrange
+                                              .withOpacity(0.4),
+                                        ),
+                                      ),
+                                  child: const Text(
+                                    "Assign",
+                                    style: NavigoTextStyles.button,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
         ),
       ),
-    ),
 
-    /// ✅ CORRECT NAVBAR
-    bottomNavigationBar: const RouteManagerNavBar(
-      currentIndex: 1,
-    ),
-  );
-}
-
-  Widget filterChip(String label) {
-    final isSelected = selectedFilter == label;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedFilter = label;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.orange : Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(label),
-      ),
+      bottomNavigationBar: const RouteManagerNavBar(currentIndex: 1),
     );
   }
 
-  Widget statusChip(String status) {
-    Color color;
+  Widget _statusChip(String status) {
+    final Color color;
 
     switch (status) {
       case "Available":
-        color = Colors.green;
+        color = NavigoColors.accentGreen;
         break;
       case "On Trip":
-        color = Colors.blue;
+        color = NavigoColors.accentBlue;
         break;
       case "Offline":
-        color = Colors.red;
+        color = NavigoColors.accentRed;
         break;
       default:
-        color = Colors.grey;
+        color = NavigoColors.textMuted;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(color: color),
-      ),
-    );
+    return NavigoDecorations.statusChip(label: status, color: color);
   }
 }

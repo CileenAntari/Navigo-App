@@ -66,8 +66,8 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
 
       if (doc.exists) {
         setState(() {
-          _userName =
-              "${doc['firstName'] ?? ''} ${doc['lastName'] ?? ''}".trim();
+          _userName = "${doc['firstName'] ?? ''} ${doc['lastName'] ?? ''}"
+              .trim();
         });
       } else {
         setState(() => _userName = "Guest");
@@ -95,16 +95,16 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
         return;
       }
 
-      final bool serviceEnabled =
-          await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return;
 
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw Exception("Location timeout"),
-      );
+      Position position =
+          await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw Exception("Location timeout"),
+          );
 
       if (!mounted) return;
 
@@ -139,15 +139,15 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
 
   void _confirmRide() {
     if (_selectedLine == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select a line")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select a line")));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Ride Confirmed 🚀")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Ride Confirmed 🚀")));
   }
 
   // ================= BUILD =================
@@ -177,38 +177,24 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
               child: Column(
                 children: [
                   // ── HEADER ───────────────────────────────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Hello, $_userName 👋", // ✅ dynamic name
-                            style: NavigoTextStyles.titleLarge,
-                          ),
-                          Text(
-                            "Where would you like to go?",
-                            style: NavigoTextStyles.bodySmall,
-                          ),
-                        ],
-                      ),
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(3),
-                          child: ClipOval(
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              fit: BoxFit.contain,
-                              width: 30,
-                              height: 30,
-                            ),
+                  NavigoDecorations.homeStyleTitleBar(
+                    title: "Hello, $_userName 👋",
+                    subtitle: "Where would you like to go?",
+                    avatar: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: NavigoColors.surfaceWhite,
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.contain,
+                            width: 30,
+                            height: 30,
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
 
                   const SizedBox(height: 14),
@@ -221,21 +207,23 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           children: [
                             TextField(
                               controller: _searchController,
-                              style: const TextStyle(color: Colors.black),
-                              decoration:
-                                  NavigoDecorations.kInputDecoration.copyWith(
-                                hintText: "Search or select a line",
-                                filled: true,
-                                fillColor: Colors.white,
-                                prefixIcon: const Icon(
-                                  Icons.search,
-                                  color: NavigoColors.primaryOrange,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide.none,
-                                ),
+                              style: const TextStyle(
+                                color: NavigoColors.textDark,
                               ),
+                              decoration: NavigoDecorations.kInputDecoration
+                                  .copyWith(
+                                    hintText: "Search or select a line",
+                                    filled: true,
+                                    fillColor: NavigoColors.surfaceWhite,
+                                    prefixIcon: const Icon(
+                                      Icons.search,
+                                      color: NavigoColors.accentGreen,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
                               onChanged: _filterLines,
                             ),
 
@@ -243,10 +231,11 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                 _searchController.text.isNotEmpty)
                               Container(
                                 margin: const EdgeInsets.only(top: 6),
-                                constraints:
-                                    const BoxConstraints(maxHeight: 150),
+                                constraints: const BoxConstraints(
+                                  maxHeight: 150,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: NavigoColors.surfaceWhite,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: ListView.builder(
@@ -257,8 +246,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                       title: Text(_filteredLines[index]),
                                       onTap: () {
                                         setState(() {
-                                          _selectedLine =
-                                              _filteredLines[index];
+                                          _selectedLine = _filteredLines[index];
                                           _searchController.text =
                                               _selectedLine!;
                                           _filteredLines = [];
@@ -277,8 +265,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       _isLocating
                           ? const CircularProgressIndicator()
                           : FloatingActionButton.small(
-                              backgroundColor:
-                                  NavigoColors.primaryOrange,
+                              backgroundColor: NavigoColors.primaryOrange,
                               onPressed: _getUserLocation,
                               child: const Icon(Icons.my_location),
                             ),
@@ -296,21 +283,64 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
             right: 0,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
               decoration: BoxDecoration(
                 color: NavigoColors.lightorange,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 16),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Line: ${_selectedLine ?? 'Not selected'}"),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
 
-                  ElevatedButton(
-                    onPressed: _confirmRide,
-                    child: const Text("Confirm Ride"),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.directions_bus,
+                        color: NavigoColors.accentGreen,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Line: ${_selectedLine ?? 'Not selected'}",
+                        style: NavigoTextStyles.bodyMedium.copyWith(
+                          color: NavigoColors.textMuted,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _confirmRide,
+                      style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                      child: const Text(
+                        "Confirm Ride",
+                        style: NavigoTextStyles.button,
+                      ),
+                    ),
                   ),
                 ],
               ),

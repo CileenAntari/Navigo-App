@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/app_theme.dart';
 import 'DriverBottomNavBar.dart';
+import 'DriverHomeScreen.dart';
 
 class DriverRequestsScreen extends StatefulWidget {
   const DriverRequestsScreen({super.key});
@@ -21,22 +24,22 @@ class _DriverRequestsScreenState extends State<DriverRequestsScreen> {
       {
         "passenger": "Cileen",
         "route": "Birzeit → Ramallah",
-        "pickup": "Birzeit – Main Gate",
-        "dropoff": "Ramallah – Al-Manara",
+        "pickup": "Birzeit - Main Gate",
+        "dropoff": "Ramallah - Al-Manara",
         "isNearby": true,
       },
       {
         "passenger": "Ahmad",
         "route": "Al-Bireh → Ramallah",
-        "pickup": "Al-Bireh – Roundabout",
-        "dropoff": "Ramallah – Al-Manara",
+        "pickup": "Al-Bireh - Roundabout",
+        "dropoff": "Ramallah - Al-Manara",
         "isNearby": true,
       },
       {
         "passenger": "Rawan",
         "route": "Birzeit → Nablus",
-        "pickup": "Birzeit – Campus Gate",
-        "dropoff": "Nablus – City Center",
+        "pickup": "Birzeit - Campus Gate",
+        "dropoff": "Nablus - City Center",
         "isNearby": false,
       },
     ];
@@ -75,59 +78,66 @@ class _DriverRequestsScreenState extends State<DriverRequestsScreen> {
 
   Widget buildRequestCard(Map<String, dynamic> request) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: NavigoDecorations.kCardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Passenger: ${request["passenger"]}",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Row(
+            children: [
+              const Icon(
+                Icons.person,
+                color: NavigoColors.accentGreen,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                request["passenger"],
+                style: NavigoTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: NavigoColors.textDark,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 10),
+
           Text(
             request["route"],
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: NavigoTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+              color: NavigoColors.textDark,
+            ),
           ),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 6),
+
           Text(
             "Pickup: ${request["pickup"]}",
-            style: TextStyle(color: Colors.grey[700]),
+            style: NavigoTextStyles.bodySmall,
           ),
+
           const SizedBox(height: 4),
+
           Text(
             "Drop-off: ${request["dropoff"]}",
-            style: TextStyle(color: Colors.grey[700]),
+            style: NavigoTextStyles.bodySmall,
           ),
+
           const SizedBox(height: 16),
+
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () {
                     _removeRequest(request, "Declined");
                   },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  style: NavigoDecorations.coloredButton(
+                    NavigoColors.accentRed,
                   ),
-                  child: const Text(
-                    "Decline",
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  child: const Text("Decline"),
                 ),
               ),
               const SizedBox(width: 10),
@@ -136,17 +146,8 @@ class _DriverRequestsScreenState extends State<DriverRequestsScreen> {
                   onPressed: () {
                     _removeRequest(request, "Accepted");
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Accept",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                  child: const Text("Accept"),
                 ),
               ),
             ],
@@ -156,37 +157,80 @@ class _DriverRequestsScreenState extends State<DriverRequestsScreen> {
     );
   }
 
+  Widget buildNearbyButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          nearbyOnly = !nearbyOnly;
+        });
+      },
+      child: Container(
+        height: 45,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: NavigoDecorations.selectorDecoration(
+          selected: nearbyOnly,
+        ).copyWith(color: nearbyOnly ? null : NavigoColors.lightorange),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.near_me,
+              size: 16,
+              color: nearbyOnly
+                  ? NavigoColors.textLight
+                  : NavigoColors.primaryOrange,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              "Nearby",
+              style: NavigoTextStyles.chip.copyWith(
+                color: nearbyOnly
+                    ? NavigoColors.textLight
+                    : NavigoColors.primaryOrange,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: NavigoColors.backgroundLight,
       bottomNavigationBar: const DriverBottomNavBar(currentIndex: 2),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Trip Requests",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
               ),
-              const SizedBox(height: 16),
+            ),
 
-              /// SEARCH + NEARBY FILTER
-              Row(
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text("Trip Requests", style: NavigoTextStyles.titleLarge),
+            ),
+
+            const SizedBox(height: 16),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
                 children: [
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Search passenger, pickup, route...",
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
+                      decoration: NavigoDecorations.kInputDecoration.copyWith(
+                        hintText: "Search requests...",
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: NavigoColors.accentGreen,
                         ),
+                        fillColor: NavigoColors.surfaceWhite,
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -195,68 +239,36 @@ class _DriverRequestsScreenState extends State<DriverRequestsScreen> {
                       },
                     ),
                   ),
+
                   const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        nearbyOnly = !nearbyOnly;
-                      });
-                    },
-                    child: Container(
-                      height: 56,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: nearbyOnly
-                            ? Colors.orange.withOpacity(0.15)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: nearbyOnly
-                              ? Colors.orange
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.near_me,
-                            size: 18,
-                            color: nearbyOnly ? Colors.orange : Colors.grey,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            "Nearby",
-                            style: TextStyle(
-                              color: nearbyOnly ? Colors.orange : Colors.grey,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
+                  buildNearbyButton(),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
-              Expanded(
-                child: filteredRequests.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "No requests found",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: filteredRequests.length,
-                        itemBuilder: (context, index) {
-                          return buildRequestCard(filteredRequests[index]);
-                        },
+            Expanded(
+              child: filteredRequests.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No requests found",
+                        style: NavigoTextStyles.bodySmall,
                       ),
-              ),
-            ],
-          ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filteredRequests.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, index) {
+                        return buildRequestCard(filteredRequests[index]);
+                      },
+                    ),
+            ),
+
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );

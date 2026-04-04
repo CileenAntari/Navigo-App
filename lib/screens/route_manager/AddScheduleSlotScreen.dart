@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navigo/theme/app_theme.dart';
 
 class AddScheduleSlotScreen extends StatefulWidget {
   const AddScheduleSlotScreen({super.key});
@@ -27,7 +28,6 @@ class _AddScheduleSlotScreenState extends State<AddScheduleSlotScreen> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-
     if (picked != null) {
       setState(() {
         if (isFrom) {
@@ -46,11 +46,8 @@ class _AddScheduleSlotScreenState extends State<AddScheduleSlotScreen> {
       lastDate: DateTime(2030),
       initialDate: DateTime.now(),
     );
-
     if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
+      setState(() => selectedDate = picked);
     }
   }
 
@@ -75,204 +72,262 @@ class _AddScheduleSlotScreenState extends State<AddScheduleSlotScreen> {
       "type": selectedType,
       "seats": seats ?? "",
     };
-
     Navigator.pop(context, slot);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: NavigoColors.backgroundLight,
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// TOP BAR
+            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Add Schedule Slot",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            /// TITLE
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavigoSizes.screenPadding,
               ),
-
-              const SizedBox(height: 20),
-
-              Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildTypeButton("bus", "Bus"),
-                  const SizedBox(width: 10),
-                  buildTypeButton("micro", "Micro Bus"),
+                  Text("Add Schedule Slot", style: NavigoTextStyles.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Fill in the details for the new slot",
+                    style: NavigoTextStyles.bodySmall,
+                  ),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: NavigoSizes.sectionGap),
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange),
+            /// SCROLLABLE CONTENT
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NavigoSizes.screenPadding,
                 ),
-
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Slot ID"),
+                    /// TYPE SELECTOR
                     Row(
                       children: [
-                        const Text("L-"),
-                        Expanded(
-                          child: TextField(
-                            controller: slotIdController,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildPickerBox(
-                            "From",
-                            formatTime(fromTime),
-                            () => pickTime(true),
-                          ),
+                        NavigoDecorations.selectorChip(
+                          label: "Bus",
+                          selected: selectedType == "bus",
+                          onTap: () => setState(() => selectedType = "bus"),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(
-                          child: buildPickerBox(
-                            "To",
-                            formatTime(toTime),
-                            () => pickTime(false),
-                          ),
+                        NavigoDecorations.selectorChip(
+                          label: "Micro Bus",
+                          selected: selectedType == "micro",
+                          onTap: () => setState(() => selectedType = "micro"),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 15),
+                    const SizedBox(height: NavigoSizes.sectionGap),
 
-                    const Text("Frequency"),
-
-                    Row(
-                      children: [
-                        const Text("Every "),
-                        Expanded(
-                          child: TextField(
-                            controller: frequencyController,
-                            keyboardType: TextInputType.number,
+                    /// FORM CARD
+                    Container(
+                      padding: const EdgeInsets.all(NavigoSizes.cardPadding),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// SLOT ID
+                          Text("Slot ID", style: NavigoTextStyles.label),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Text("L-", style: NavigoTextStyles.fieldText),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: slotIdController,
+                                  keyboardType: TextInputType.number,
+                                  style: NavigoTextStyles.fieldText,
+                                  decoration: NavigoDecorations.kInputDecoration
+                                      .copyWith(hintText: "e.g. 12"),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const Text(" minutes"),
-                      ],
-                    ),
 
-                    const SizedBox(height: 15),
+                          const SizedBox(height: NavigoSizes.itemGap),
 
-                    const Text("Date"),
-                    buildPickerBox("", formatDate(selectedDate), pickDate),
+                          /// FROM / TO TIME
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildPickerBox(
+                                  label: "From",
+                                  value: formatTime(fromTime),
+                                  icon: Icons.access_time,
+                                  onTap: () => pickTime(true),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildPickerBox(
+                                  label: "To",
+                                  value: formatTime(toTime),
+                                  icon: Icons.access_time_filled,
+                                  onTap: () => pickTime(false),
+                                ),
+                              ),
+                            ],
+                          ),
 
-                    if (selectedType == "bus") ...[
-                      const SizedBox(height: 15),
+                          const SizedBox(height: NavigoSizes.itemGap),
 
-                      const Text("Seats"),
+                          /// FREQUENCY
+                          Text("Frequency", style: NavigoTextStyles.label),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Text("Every ", style: NavigoTextStyles.fieldText),
+                              Expanded(
+                                child: TextField(
+                                  controller: frequencyController,
+                                  keyboardType: TextInputType.number,
+                                  style: NavigoTextStyles.fieldText,
+                                  decoration: NavigoDecorations.kInputDecoration
+                                      .copyWith(hintText: "e.g. 30"),
+                                ),
+                              ),
+                              Text(
+                                " minutes",
+                                style: NavigoTextStyles.fieldText,
+                              ),
+                            ],
+                          ),
 
-                      DropdownButtonFormField<String>(
-                        initialValue: seats,
-                        items: const [
-                          DropdownMenuItem(value: "45", child: Text("45")),
-                          DropdownMenuItem(value: "14", child: Text("14")),
+                          const SizedBox(height: NavigoSizes.itemGap),
+
+                          /// DATE
+                          Text("Date", style: NavigoTextStyles.label),
+                          const SizedBox(height: 6),
+                          _buildPickerBox(
+                            label: "",
+                            value: formatDate(selectedDate),
+                            icon: Icons.calendar_today,
+                            onTap: pickDate,
+                          ),
+
+                          /// SEATS (bus only)
+                          if (selectedType == "bus") ...[
+                            const SizedBox(height: NavigoSizes.itemGap),
+                            Text("Seats", style: NavigoTextStyles.label),
+                            const SizedBox(height: 6),
+                            DropdownButtonFormField<String>(
+                              value: seats,
+                              decoration: NavigoDecorations.kInputDecoration,
+                              style: NavigoTextStyles.fieldText,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: "45",
+                                  child: Text("45 seats"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "14",
+                                  child: Text("14 seats"),
+                                ),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => seats = value),
+                            ),
+                          ],
                         ],
-                        onChanged: (value) {
-                          setState(() {
-                            seats = value;
-                          });
-                        },
                       ),
-                    ],
+                    ),
+
+                    const SizedBox(height: NavigoSizes.sectionGap),
+
+                    /// SAVE BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: NavigoSizes.buttonHeight,
+                      child: ElevatedButton(
+                        onPressed: saveSlot,
+                        style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                        child: const Text(
+                          "Save Slot",
+                          style: NavigoTextStyles.button,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: NavigoSizes.itemGap),
+
+                    /// CANCEL BUTTON
+                    /// CANCEL BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: NavigoSizes.buttonHeight,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: NavigoDecorations.kPrimaryButtonLargeStyle
+                            .copyWith(
+                              backgroundColor: const WidgetStatePropertyAll(
+                                NavigoColors.accentRed,
+                              ),
+                            ),
+                        child: const Text(
+                          "Cancel",
+                          style: NavigoTextStyles.button,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: NavigoSizes.sectionGap),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                onPressed: saveSlot,
-                child: const Text("Save Slot"),
-              ),
-
-              const SizedBox(height: 10),
-
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Cancel"),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
-
-      /*bottomNavigationBar: RouteManagerNavBar(
-        currentIndex:1,
-        onTap:(index){},
-      ),*/
-    );
-  }
-
-  Widget buildTypeButton(String type, String label) {
-    final isSelected = selectedType == type;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedType = type;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.orange : Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(label),
       ),
     );
   }
 
-  Widget buildPickerBox(String label, String value, VoidCallback onTap) {
+  Widget _buildPickerBox({
+    required String label,
+    required String value,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (label != "") Text(label),
-
+        if (label.isNotEmpty) ...[
+          Text(label, style: NavigoTextStyles.label),
+          const SizedBox(height: 6),
+        ],
         GestureDetector(
           onTap: onTap,
-
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey),
+            decoration: NavigoDecorations.surfaceDecoration(
+              radius: NavigoSizes.inputRadius,
+              color: NavigoColors.inputFill,
+              bordered: false,
             ),
-            child: Text(value),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: NavigoColors.accentGreen),
+                const SizedBox(width: 8),
+                Text(value, style: NavigoTextStyles.fieldText),
+              ],
+            ),
           ),
         ),
       ],

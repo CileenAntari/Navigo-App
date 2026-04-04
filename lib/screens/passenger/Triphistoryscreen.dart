@@ -124,7 +124,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
       case TripStatus.completed:
         return NavigoColors.accentGreen;
       case TripStatus.cancelled:
-        return Colors.red;
+        return NavigoColors.accentRed;
       case TripStatus.ongoing:
         return NavigoColors.primaryOrange;
     }
@@ -157,7 +157,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: NavigoColors.transparent,
       builder: (_) => _TripDetailSheet(trip: trip),
     );
   }
@@ -165,25 +165,10 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
   // ── FILTER CHIP ───────────────────────────────────────────────────────────
   Widget _filterChip({required String label, required TripStatus? value}) {
     final selected = _filterStatus == value;
-    return GestureDetector(
+    return NavigoDecorations.selectorChip(
+      label: label,
+      selected: selected,
       onTap: () => setState(() => _filterStatus = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? NavigoColors.primaryOrange : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: NavigoColors.primaryOrange, width: 1.5),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : NavigoColors.primaryOrange,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-        ),
-      ),
     );
   }
 
@@ -265,12 +250,10 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
                                 Container(
                                   width: 42,
                                   height: 42,
-                                  decoration: BoxDecoration(
-                                    color: _statusColor(
-                                      trip.status,
-                                    ).withOpacity(0.12),
-                                    shape: BoxShape.circle,
-                                  ),
+                                  decoration: NavigoDecorations
+                                      .iconCircleDecoration(
+                                        _statusColor(trip.status),
+                                      ),
                                   child: Icon(
                                     _statusIcon(trip.status),
                                     color: _statusColor(trip.status),
@@ -305,8 +288,8 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
                                         children: [
                                           const Icon(
                                             Icons.calendar_today,
-                                            size: 13,
-                                            color: Colors.grey,
+                                          size: 13,
+                                            color: NavigoColors.textMuted,
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
@@ -321,24 +304,12 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
                                 ),
 
                                 // Status badge
-                                Container(
+                                NavigoDecorations.statusChip(
+                                  label: _statusLabel(trip.status),
+                                  color: _statusColor(trip.status),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _statusColor(
-                                      trip.status,
-                                    ).withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    _statusLabel(trip.status),
-                                    style: TextStyle(
-                                      color: _statusColor(trip.status),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
                                   ),
                                 ),
                               ],
@@ -368,7 +339,7 @@ class _TripDetailSheet extends StatelessWidget {
       case TripStatus.completed:
         return NavigoColors.accentGreen;
       case TripStatus.cancelled:
-        return Colors.red;
+        return NavigoColors.accentRed;
       case TripStatus.ongoing:
         return NavigoColors.primaryOrange;
     }
@@ -412,10 +383,7 @@ class _TripDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+      decoration: NavigoDecorations.kBottomSheetDecoration,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -423,14 +391,7 @@ class _TripDetailSheet extends StatelessWidget {
         children: [
           // Drag handle
           Center(
-            child: Container(
-              width: 40,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            child: NavigoDecorations.dragHandle(),
           ),
 
           const SizedBox(height: 20),
@@ -440,23 +401,9 @@ class _TripDetailSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Trip Details', style: NavigoTextStyles.titleSmall),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: _statusColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _statusLabel,
-                  style: TextStyle(
-                    color: _statusColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
+              NavigoDecorations.statusChip(
+                label: _statusLabel,
+                color: _statusColor,
               ),
             ],
           ),

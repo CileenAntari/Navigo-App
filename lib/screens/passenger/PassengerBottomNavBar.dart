@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navigo/screens/passenger/Triphistoryscreen.dart';
+import '../../theme/app_theme.dart';
 import 'passengerHomeScreen.dart';
 import 'schedulescreen.dart';
 //import 'RouteDetailsScreen.dart';
@@ -42,12 +43,7 @@ class PassengerBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10),
-        ],
-      ),
+      decoration: NavigoDecorations.kBottomNavDecoration,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -75,20 +71,10 @@ class PassengerBottomNavBar extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => _onItemTapped(context, index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: isActive ? Colors.green : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isActive ? Colors.green : Colors.grey,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-        ],
+      child: NavigoDecorations.navItem(
+        icon: icon,
+        label: label,
+        isActive: isActive,
       ),
     );
   }

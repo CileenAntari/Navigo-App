@@ -1,7 +1,95 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/app_theme.dart';
 import 'DriverBottomNavBar.dart';
-import 'TripDetailes.dart';
+import 'DriverHomeScreen.dart';
 import 'DriverLiveTripScreen.dart';
+import 'TripDetailes.dart';
+
+enum DriverTripStatus { upcoming, ongoing, completed, cancelled }
+
+class DriverTrip {
+  final String id;
+  final String line;
+  final String from;
+  final String to;
+  final String date;
+  final String time;
+  final String duration;
+  final String price;
+  final int seats;
+  final String vehicleType;
+  final DriverTripStatus status;
+
+  const DriverTrip({
+    required this.id,
+    required this.line,
+    required this.from,
+    required this.to,
+    required this.date,
+    required this.time,
+    required this.duration,
+    required this.price,
+    required this.seats,
+    required this.vehicleType,
+    required this.status,
+  });
+}
+
+const List<DriverTrip> _trips = [
+  DriverTrip(
+    id: 'T001',
+    line: 'Birzeit ↔ Ramallah (Line 12)',
+    from: 'Birzeit - Main Gate',
+    to: 'Ramallah - Al-Manara',
+    date: '10 Apr 2025',
+    time: '09:30',
+    duration: '20 min',
+    price: '6.00 NIS',
+    seats: 1,
+    vehicleType: 'Bus',
+    status: DriverTripStatus.upcoming,
+  ),
+  DriverTrip(
+    id: 'T002',
+    line: 'Birzeit ↔ Ramallah (Line 12)',
+    from: 'Birzeit - Main Gate',
+    to: 'Ramallah - Al-Manara',
+    date: '01 Apr 2026',
+    time: '09:50',
+    duration: '20 min',
+    price: '6.00 NIS',
+    seats: 1,
+    vehicleType: 'Bus',
+    status: DriverTripStatus.ongoing,
+  ),
+  DriverTrip(
+    id: 'T003',
+    line: 'Birzeit ↔ Ramallah (Line 12)',
+    from: 'Birzeit - Main Gate',
+    to: 'Ramallah - Al-Manara',
+    date: '01 Apr 2026',
+    time: '09:50',
+    duration: '20 min',
+    price: '6.00 NIS',
+    seats: 1,
+    vehicleType: 'Bus',
+    status: DriverTripStatus.completed,
+  ),
+  DriverTrip(
+    id: 'T004',
+    line: 'Birzeit ↔ Ramallah (Line 12)',
+    from: 'Birzeit - Main Gate',
+    to: 'Ramallah - Al-Manara',
+    date: '01 Apr 2026',
+    time: '09:50',
+    duration: '20 min',
+    price: '6.00 NIS',
+    seats: 1,
+    vehicleType: 'Bus',
+    status: DriverTripStatus.cancelled,
+  ),
+];
 
 class DriverTripsScreen extends StatefulWidget {
   const DriverTripsScreen({super.key});
@@ -11,228 +99,307 @@ class DriverTripsScreen extends StatefulWidget {
 }
 
 class _DriverTripsScreenState extends State<DriverTripsScreen> {
-  String selectedFilter = "All";
+  DriverTripStatus? _filterStatus;
 
-  final List<Map<String, dynamic>> trips = [
-    {
-      "title": "Birzeit → Ramallah (Line 12)",
-      "route": "Birzeit – Main Gate\nRamallah – Al-Manara",
-      "date": "2025-04-10",
-      "time": "09:30",
-      "status": "Upcoming",
-      "tripId": "T001",
-      "line": "Birzeit → Ramallah (Line 12)",
-      "from": "Birzeit – Main Gate",
-      "to": "Ramallah – Al-Manara",
-      "duration": "20 min",
-      "price": "6.00 NIS",
-      "seats": "1",
-      "vehicle": "Bus",
-    },
-    {
-      "title": "Birzeit → Ramallah (Line 12)",
-      "route": "Birzeit – Main Gate\nRamallah – Al-Manara",
-      "date": "2026-04-01",
-      "time": "09:50",
-      "status": "Ongoing",
-      "tripId": "T002",
-      "line": "Birzeit → Ramallah (Line 12)",
-      "from": "Birzeit – Main Gate",
-      "to": "Ramallah – Al-Manara",
-      "duration": "20 min",
-      "price": "6.00 NIS",
-      "seats": "1",
-      "vehicle": "Bus",
-    },
-    {
-      "title": "Birzeit → Ramallah (Line 12)",
-      "route": "Birzeit – Main Gate\nRamallah – Al-Manara",
-      "date": "2026-04-01",
-      "time": "09:50",
-      "status": "Completed",
-      "tripId": "T003",
-      "line": "Birzeit → Ramallah (Line 12)",
-      "from": "Birzeit – Main Gate",
-      "to": "Ramallah – Al-Manara",
-      "duration": "20 min",
-      "price": "6.00 NIS",
-      "seats": "1",
-      "vehicle": "Bus",
-    },
-    {
-      "title": "Birzeit → Ramallah (Line 12)",
-      "route": "Birzeit – Main Gate\nRamallah – Al-Manara",
-      "date": "2026-04-01",
-      "time": "09:50",
-      "status": "Cancelled",
-      "tripId": "T004",
-      "line": "Birzeit → Ramallah (Line 12)",
-      "from": "Birzeit – Main Gate",
-      "to": "Ramallah – Al-Manara",
-      "duration": "20 min",
-      "price": "6.00 NIS",
-      "seats": "1",
-      "vehicle": "Bus",
-    },
-  ];
+  List<DriverTrip> get _filtered => _filterStatus == null
+      ? _trips
+      : _trips.where((trip) => trip.status == _filterStatus).toList();
 
-  List<Map<String, dynamic>> get filteredTrips {
-    if (selectedFilter == "All") return trips;
-    return trips.where((trip) => trip["status"] == selectedFilter).toList();
-  }
-
-  Color getStatusColor(String status) {
+  Color _statusColor(DriverTripStatus status) {
     switch (status) {
-      case "Upcoming":
-        return Colors.blue;
-      case "Ongoing":
-        return Colors.orange;
-      case "Completed":
-        return Colors.green;
-      case "Cancelled":
-        return Colors.red;
-      default:
-        return Colors.grey;
+      case DriverTripStatus.upcoming:
+        return NavigoColors.accentBlue;
+      case DriverTripStatus.ongoing:
+        return NavigoColors.primaryOrange;
+      case DriverTripStatus.completed:
+        return NavigoColors.accentGreen;
+      case DriverTripStatus.cancelled:
+        return NavigoColors.accentRed;
     }
   }
 
-  IconData getStatusIcon(String status) {
+  String _statusLabel(DriverTripStatus status) {
     switch (status) {
-      case "Upcoming":
+      case DriverTripStatus.upcoming:
+        return 'Upcoming';
+      case DriverTripStatus.ongoing:
+        return 'Ongoing';
+      case DriverTripStatus.completed:
+        return 'Completed';
+      case DriverTripStatus.cancelled:
+        return 'Cancelled';
+    }
+  }
+
+  IconData _statusIcon(DriverTripStatus status) {
+    switch (status) {
+      case DriverTripStatus.upcoming:
         return Icons.schedule;
-      case "Ongoing":
-        return Icons.access_time;
-      case "Completed":
-        return Icons.check_circle;
-      case "Cancelled":
-        return Icons.cancel;
-      default:
-        return Icons.trip_origin;
+      case DriverTripStatus.ongoing:
+        return Icons.directions_bus;
+      case DriverTripStatus.completed:
+        return Icons.check_circle_outline;
+      case DriverTripStatus.cancelled:
+        return Icons.cancel_outlined;
     }
   }
 
-  Widget buildFilterChip(String label) {
-    bool isActive = selectedFilter == label;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedFilter = label;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.orange.withOpacity(0.2) : Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.orange : Colors.grey[700],
-            fontWeight: FontWeight.w600,
+  void _openTrip(DriverTrip trip) {
+    if (trip.status == DriverTripStatus.upcoming) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TripDetailes(
+            trip: {
+              'title': trip.line,
+              'tripId': trip.id,
+              'vehicle': trip.vehicleType,
+              'date': trip.date,
+              'time': trip.time,
+              'from': trip.from,
+              'to': trip.to,
+            },
           ),
+        ),
+      );
+      return;
+    }
+    if (trip.status == DriverTripStatus.ongoing) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DriverLiveTripScreen()),
+      );
+      return;
+    }
+    _showDetails(trip);
+  }
+
+  void _showDetails(DriverTrip trip) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: NavigoColors.transparent,
+      builder: (_) => _DriverTripDetailSheet(trip: trip),
+    );
+  }
+
+  // ── FILTER CHIP ───────────────────────────────────────────────────────────
+  Widget _filterChip({
+    required String label,
+    required DriverTripStatus? value,
+  }) {
+    final selected = _filterStatus == value;
+    return NavigoDecorations.selectorChip(
+      label: label,
+      selected: selected,
+      onTap: () => setState(() => _filterStatus = value),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: NavigoColors.backgroundLight,
+      bottomNavigationBar: const DriverBottomNavBar(currentIndex: 1),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text('Trip History', style: NavigoTextStyles.titleLarge),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _filterChip(label: 'All', value: null),
+                    const SizedBox(width: 7),
+                    _filterChip(
+                      label: 'Upcoming',
+                      value: DriverTripStatus.upcoming,
+                    ),
+                    const SizedBox(width: 7),
+                    _filterChip(
+                      label: 'Ongoing',
+                      value: DriverTripStatus.ongoing,
+                    ),
+                    const SizedBox(width: 7),
+                    _filterChip(
+                      label: 'Completed',
+                      value: DriverTripStatus.completed,
+                    ),
+                    const SizedBox(width: 7),
+                    _filterChip(
+                      label: 'Cancelled',
+                      value: DriverTripStatus.cancelled,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── TRIP LIST ──────────────────────────────────────
+            Expanded(
+              child: _filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No trips found.',
+                        style: NavigoTextStyles.bodySmall,
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) {
+                        final trip = _filtered[i];
+                        return GestureDetector(
+                          onTap: () => _openTrip(trip),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: NavigoDecorations.kCardDecoration,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // ── Status icon ──────────────
+                                Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: NavigoDecorations
+                                      .iconCircleDecoration(
+                                        _statusColor(trip.status),
+                                      ),
+                                  child: Icon(
+                                    _statusIcon(trip.status),
+                                    color: _statusColor(trip.status),
+                                    size: 22,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+
+                                // ── Trip info ────────────────
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        trip.line,
+                                        style: NavigoTextStyles.bodyMedium
+                                            .copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: NavigoColors.textDark,
+                                              fontSize: 14,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${trip.from}  →  ${trip.to}',
+                                        style: NavigoTextStyles.bodySmall,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.calendar_today,
+                                            size: 13,
+                                            color: NavigoColors.textMuted,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${trip.date}  •  ${trip.time}',
+                                            style: NavigoTextStyles.bodySmall
+                                                .copyWith(fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // ── Status badge ─────────────
+                                NavigoDecorations.statusChip(
+                                  label: _statusLabel(trip.status),
+                                  color: _statusColor(trip.status),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
   }
+}
 
-  void _showCompletedTripSheet(Map<String, dynamic> trip) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.56,
-          minChildSize: 0.45,
-          maxChildSize: 0.85,
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 44,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Trip Details",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          trip["status"],
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    _buildDetailRow("Trip ID", trip["tripId"]),
-                    _buildDetailRow("Line", trip["line"]),
-                    _buildDetailRow("From", trip["from"]),
-                    _buildDetailRow("To", trip["to"]),
-                    _buildDetailRow("Date", trip["date"]),
-                    _buildDetailRow("Time", trip["time"]),
-                    _buildDetailRow("Duration", trip["duration"]),
-                    _buildDetailRow("Price", trip["price"]),
-                    _buildDetailRow("Seats", trip["seats"]),
-                    _buildDetailRow("Vehicle", trip["vehicle"]),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+// ── TRIP DETAIL BOTTOM SHEET ──────────────────────────────────────────────────
+class _DriverTripDetailSheet extends StatelessWidget {
+  final DriverTrip trip;
+
+  const _DriverTripDetailSheet({required this.trip});
+
+  Color get _statusColor {
+    switch (trip.status) {
+      case DriverTripStatus.upcoming:
+        return NavigoColors.accentBlue;
+      case DriverTripStatus.ongoing:
+        return NavigoColors.primaryOrange;
+      case DriverTripStatus.completed:
+        return NavigoColors.accentGreen;
+      case DriverTripStatus.cancelled:
+        return NavigoColors.accentRed;
+    }
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  String get _statusLabel {
+    switch (trip.status) {
+      case DriverTripStatus.upcoming:
+        return 'Upcoming';
+      case DriverTripStatus.ongoing:
+        return 'Ongoing';
+      case DriverTripStatus.completed:
+        return 'Completed';
+      case DriverTripStatus.cancelled:
+        return 'Cancelled';
+    }
+  }
+
+  Widget _row(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 72,
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[500], fontSize: 13),
-            ),
+            width: 110,
+            child: Text(label, style: NavigoTextStyles.label),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+              style: NavigoTextStyles.bodyMedium.copyWith(
+                color: NavigoColors.textDark,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -241,143 +408,75 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
     );
   }
 
-  void _openTripScreen(Map<String, dynamic> trip) {
-    final String status = trip["status"];
-
-    if (status == "Cancelled") {
-      return;
-    }
-
-    if (status == "Ongoing") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const DriverLiveTripScreen()),
-      );
-    } else if (status == "Upcoming") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => TripDetailes(trip: trip)),
-      );
-    } else if (status == "Completed") {
-      _showCompletedTripSheet(trip);
-    }
-  }
-
-  Widget buildTripCard(Map<String, dynamic> trip) {
-    Color statusColor = getStatusColor(trip["status"]);
-    bool isCancelled = trip["status"] == "Cancelled";
-
-    return GestureDetector(
-      onTap: () => _openTripScreen(trip),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Opacity(
-          opacity: isCancelled ? 0.75 : 1,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(getStatusIcon(trip["status"]), color: statusColor),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trip["title"],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      trip["route"],
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "${trip["date"]} - ${trip["time"]}",
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  trip["status"],
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const DriverBottomNavBar(currentIndex: 1),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: NavigoDecorations.kBottomSheetDecoration,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle
+          Center(
+            child: NavigoDecorations.dragHandle(),
+          ),
+          const SizedBox(height: 20),
+
+          // ── Title + status badge ──────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Trip History",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    buildFilterChip("All"),
-                    buildFilterChip("Upcoming"),
-                    buildFilterChip("Ongoing"),
-                    buildFilterChip("Completed"),
-                    buildFilterChip("Cancelled"),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredTrips.length,
-                  itemBuilder: (context, index) {
-                    return buildTripCard(filteredTrips[index]);
-                  },
-                ),
+              Text('Trip Details', style: NavigoTextStyles.titleSmall),
+              NavigoDecorations.statusChip(
+                label: _statusLabel,
+                color: _statusColor,
               ),
             ],
           ),
-        ),
+
+          const SizedBox(height: 16),
+          Divider(color: NavigoColors.primaryOrange.withOpacity(0.3)),
+          const SizedBox(height: 8),
+
+          // ── Detail rows ───────────────────────────────────
+          _row('Trip ID', trip.id),
+          _row('Line', trip.line),
+          _row('From', trip.from),
+          _row('To', trip.to),
+          _row('Date', trip.date),
+          _row('Time', trip.time),
+          _row('Duration', trip.duration),
+          _row('Price', trip.price),
+          _row('Seats', trip.seats.toString()),
+          _row('Vehicle', trip.vehicleType),
+
+          const SizedBox(height: 20),
+
+          // ── Action button (ongoing only) ──────────────────
+          if (trip.status == DriverTripStatus.ongoing)
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const DriverLiveTripScreen(),
+                    ),
+                  );
+                },
+                style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                icon: const Icon(Icons.location_on, size: 20),
+                label: const Text(
+                  'Open Live Trip',
+                  style: NavigoTextStyles.button,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

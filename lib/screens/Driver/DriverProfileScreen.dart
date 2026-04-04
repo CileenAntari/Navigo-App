@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../theme/app_theme.dart';
 import 'DriverBottomNavBar.dart';
+import 'DriverHomeScreen.dart';
 import '../../screens/passenger/support_screen.dart';
 
 class DriverProfileScreen extends StatefulWidget {
@@ -222,14 +223,18 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
     super.dispose();
   }
 
-  ImageProvider _buildProfileImage() {
-    if (_image != null) {
-      return FileImage(_image!);
-    } else if (_imageUrl != null && _imageUrl!.isNotEmpty) {
-      return NetworkImage(_imageUrl!);
-    } else {
-      return const AssetImage("assets/images/logo.png");
-    }
+  Widget _buildProfileImage({
+    BoxFit fit = BoxFit.cover,
+    double? width,
+    double? height,
+  }) {
+    final imageProvider = _image != null
+        ? FileImage(_image!)
+        : (_imageUrl != null && _imageUrl!.isNotEmpty)
+        ? NetworkImage(_imageUrl!)
+        : const AssetImage("assets/images/logo.png") as ImageProvider;
+
+    return Image(image: imageProvider, fit: fit, width: width, height: height);
   }
 
   @override
@@ -239,21 +244,23 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
+            NavigoDecorations.topBar(
+              onBack: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Driver Profile",
-                    style: NavigoTextStyles.titleLarge,
-                  ),
+                  const Text("Profile", style: NavigoTextStyles.titleLarge),
                   IconButton(
                     onPressed: _toggleEdit,
                     icon: Icon(
                       _isEditing ? Icons.close : Icons.edit,
-                      color: NavigoColors.primaryOrange,
+                      color: NavigoColors.accentGreen,
                     ),
                   ),
                 ],
@@ -270,10 +277,17 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                         child: Column(
                           children: [
                             Stack(
-                              children: [
+                              children: <Widget>[
                                 CircleAvatar(
                                   radius: 50,
-                                  backgroundImage: _buildProfileImage(),
+                                  backgroundColor: NavigoColors.surfaceWhite,
+                                  child: ClipOval(
+                                    child: _buildProfileImage(
+                                      fit: BoxFit.contain,
+                                      width: 80,
+                                      height: 80,
+                                    ),
+                                  ),
                                 ),
                                 if (_isEditing)
                                   Positioned(
@@ -283,14 +297,14 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                                       onTap: _showImagePicker,
                                       child: Container(
                                         padding: const EdgeInsets.all(6),
-                                        decoration: const BoxDecoration(
-                                          color: NavigoColors.primaryOrange,
-                                          shape: BoxShape.circle,
-                                        ),
+                                        decoration:
+                                            NavigoDecorations.iconCircleDecoration(
+                                              NavigoColors.accentGreen,
+                                            ),
                                         child: const Icon(
                                           Icons.camera_alt,
                                           size: 16,
-                                          color: Colors.white,
+                                          color: NavigoColors.textLight,
                                         ),
                                       ),
                                     ),
@@ -325,7 +339,7 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                                           height: 22,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Colors.white,
+                                            color: NavigoColors.textLight,
                                           ),
                                         )
                                       : const Text("Save"),
@@ -336,11 +350,15 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _toggleDriverStatus,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _isOnline
-                                      ? Colors.green
-                                      : Colors.grey,
-                                ),
+                                style: NavigoDecorations
+                                    .kPrimaryButtonLargeStyle
+                                    .copyWith(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        _isOnline
+                                            ? NavigoColors.accentRed
+                                            : NavigoColors.accentGreen,
+                                      ),
+                                    ),
                                 child: Text(
                                   _isOnline
                                       ? "Switch to Offline"
@@ -374,7 +392,7 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                             _settingsItem(
                               icon: Icons.logout,
                               title: "Log out",
-                              color: Colors.red,
+                              color: NavigoColors.accentRed,
                               onTap: _logout,
                             ),
                           ],
@@ -402,12 +420,12 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
         TextField(
           controller: controller,
           enabled: enabled,
-          style: const TextStyle(
+          style: NavigoTextStyles.bodyMedium.copyWith(
             color: NavigoColors.textDark,
             fontWeight: FontWeight.w500,
           ),
           decoration: NavigoDecorations.kInputDecoration.copyWith(
-            prefixIcon: Icon(icon, color: NavigoColors.primaryOrange),
+            prefixIcon: Icon(icon, color: NavigoColors.accentGreen),
           ),
         ),
       ],
@@ -418,14 +436,17 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.black,
+    Color color = NavigoColors.textDark,
   }) {
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: color),
       title: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.w500, color: color),
+        style: NavigoTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
       ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
     );

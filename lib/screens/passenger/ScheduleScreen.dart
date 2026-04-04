@@ -20,7 +20,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   TimeOfDay? _selectedTime;
   int _seatCount = 1;
 
-  final List<String> _vehicles = ['Bus', 'Mini Bus'];
+  final List<String> _vehicles = ['Bus', 'Mini Bus', 'Van'];
 
   @override
   void initState() {
@@ -119,29 +119,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 child: GestureDetector(
                                   onTap: () => setState(() => _vehicleType = v),
                                   child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
+                                    duration: const Duration(milliseconds: 180),
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
+                                      horizontal: 16,
+                                      vertical: 8,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: _vehicleType == v
-                                          ? NavigoColors.primaryOrange
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: NavigoColors.primaryOrange,
-                                        width: 1.5,
-                                      ),
-                                    ),
+                                    decoration:
+                                        NavigoDecorations.selectorDecoration(
+                                          selected: _vehicleType == v,
+                                        ),
                                     child: Center(
                                       child: Text(
                                         v,
-                                        style: TextStyle(
+                                        style: NavigoTextStyles.chip.copyWith(
                                           color: _vehicleType == v
-                                              ? Colors.white
+                                              ? NavigoColors.textLight
                                               : NavigoColors.primaryOrange,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
                                         ),
                                       ),
                                     ),
@@ -167,7 +160,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         children: [
                           const Icon(
                             Icons.directions_bus,
-                            color: NavigoColors.primaryOrange,
+                            color: NavigoColors.accentGreen,
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -208,7 +201,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   Icons.remove_circle_outline,
                                   size: 32,
                                 ),
-                                color: NavigoColors.primaryOrange,
+                                color: NavigoColors.accentGreen,
                               ),
                               const SizedBox(width: 20),
                               Text(
@@ -222,7 +215,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   Icons.add_circle_outline,
                                   size: 32,
                                 ),
-                                color: NavigoColors.primaryOrange,
+                                color: NavigoColors.accentGreen,
                               ),
                             ],
                           ),
@@ -248,7 +241,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           children: [
                             const Icon(
                               Icons.calendar_today,
-                              color: NavigoColors.primaryOrange,
+                              color: NavigoColors.accentGreen,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
@@ -281,7 +274,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           children: [
                             const Icon(
                               Icons.access_time,
-                              color: NavigoColors.primaryOrange,
+                              color: NavigoColors.accentGreen,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
@@ -301,7 +294,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     // ── CONFIRM BUTTON ─────────────────────
                     SizedBox(
                       width: double.infinity,
-                      height: 55,
+                      height: NavigoSizes.buttonHeightLarge,
                       child: ElevatedButton(
                         onPressed: _confirmSchedule,
                         style: NavigoDecorations.kPrimaryButtonLargeStyle,

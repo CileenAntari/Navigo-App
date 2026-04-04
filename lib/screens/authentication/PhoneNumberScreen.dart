@@ -129,16 +129,13 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                             TextField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                              ),
+                              style: NavigoTextStyles.fieldText,
                               decoration: NavigoDecorations.kInputDecoration
                                   .copyWith(
                                     hintText: "e.g. +97059XXXXXXXX",
                                     prefixIcon: const Icon(
                                       Icons.phone_outlined,
-                                      color: Colors.green,
+                                      color: NavigoColors.accentGreen,
                                     ),
                                     suffixIcon: IconButton(
                                       icon: const Icon(Icons.clear),
@@ -149,7 +146,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                             const SizedBox(height: 25),
                             SizedBox(
                               width: double.infinity,
-                              height: 55,
+                              height: NavigoSizes.buttonHeightLarge,
                               child: ElevatedButton(
                                 style:
                                     NavigoDecorations.kPrimaryButtonLargeStyle,
@@ -160,7 +157,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                                         height: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          color: Colors.white,
+                                          color: NavigoColors.textLight,
                                         ),
                                       )
                                     : Row(
@@ -190,9 +187,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
                                 },
                                 child: Text(
                                   "Sign in with email",
-                                  style: NavigoTextStyles.button.copyWith(
-                                    color: NavigoColors.accentGreen,
-                                  ),
+                                  style: NavigoTextStyles.actionLink,
                                 ),
                               ),
                             ),

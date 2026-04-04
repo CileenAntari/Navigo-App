@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/app_theme.dart';
 import 'DriverBottomNavBar.dart';
+import 'DriverHomeScreen.dart';
 import 'DriverLiveTripScreen.dart';
 
 class TripDetailes extends StatelessWidget {
@@ -9,159 +12,167 @@ class TripDetailes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> passengers = [
-      {
-        "name": "Ahmad Ali",
-        "pickup": "Birzeit – Main Gate",
-      },
-      {
-        "name": "Lina Omar",
-        "pickup": "Al-Bireh – Roundabout",
-      },
-      {
-        "name": "Celine Hanna",
-        "pickup": "Ramallah – Clock Square",
-      },
+    final passengers = [
+      {"name": "Ahmad Ali", "pickup": "Birzeit - Main Gate"},
+      {"name": "Lina Omar", "pickup": "Al-Bireh - Roundabout"},
+      {"name": "Celine Hanna", "pickup": "Ramallah - Clock Square"},
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
+      backgroundColor: NavigoColors.backgroundLight,
       bottomNavigationBar: const DriverBottomNavBar(currentIndex: 1),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              const Text(
-                "Trip Details",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "Review before starting",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── TOP BAR ───────────────────────────────────────
+            NavigoDecorations.topBar(onBack: () => Navigator.pop(context)),
 
-              /// SMALL TRIP INFO CARD
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
+            // ── HEADER ────────────────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Trip Details", style: NavigoTextStyles.titleLarge),
+                  SizedBox(height: 4),
+                  Text(
+                    "Review before starting",
+                    style: NavigoTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: NavigoSizes.screenPadding,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      trip["title"] ?? "Birzeit → Ramallah",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    // ── TRIP INFO CARD ─────────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: NavigoDecorations.kCardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            trip["title"] ?? "Birzeit → Ramallah",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: NavigoTextStyles.titleSmall.copyWith(
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Divider(
+                            color: NavigoColors.primaryOrange.withOpacity(0.3),
+                            height: 12,
+                          ),
+                          GridView.count(
+                            shrinkWrap: true,
+                            crossAxisCount: 2,
+                            childAspectRatio: 9,
+                            mainAxisSpacing: 4,
+                            crossAxisSpacing: 8,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              _InfoItem(
+                                title: "Trip ID",
+                                value: trip["tripId"] ?? "T001",
+                              ),
+                              _InfoItem(
+                                title: "Vehicle",
+                                value: trip["vehicle"] ?? "Bus",
+                              ),
+                              _InfoItem(
+                                title: "Date",
+                                value: trip["date"] ?? "01 Apr 2026",
+                              ),
+                              _InfoItem(
+                                title: "Time",
+                                value: trip["time"] ?? "09:50",
+                              ),
+                              _InfoItem(
+                                title: "From",
+                                value: trip["from"] ?? "Birzeit",
+                              ),
+                              _InfoItem(
+                                title: "To",
+                                value: trip["to"] ?? "Ramallah",
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 0),
-                    GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 2,
-                      childAspectRatio:9,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 8,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _InfoItem(title: "Trip ID", value: trip["tripId"] ?? "T001"),
-                        _InfoItem(title: "Vehicle", value: trip["vehicle"] ?? "Bus"),
-                        _InfoItem(title: "Date", value: trip["date"] ?? "01 Apr 2026"),
-                        _InfoItem(title: "Time", value: trip["time"] ?? "09:50"),
-                        _InfoItem(title: "From", value: trip["from"] ?? "Birzeit"),
-                        _InfoItem(title: "To", value: trip["to"] ?? "Ramallah"),
-                      ],
+
+                    const SizedBox(height: 16),
+
+                    Text("Passengers", style: NavigoTextStyles.titleSmall),
+                    const SizedBox(height: 10),
+
+                    // ── PASSENGER LIST ─────────────────────────
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: passengers.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: NavigoSizes.itemGap),
+                        itemBuilder: (context, index) {
+                          return _PassengerTile(
+                            passengerName: passengers[index]["name"]!,
+                            pickup: passengers[index]["pickup"]!,
+                          );
+                        },
+                      ),
                     ),
+
+                    const SizedBox(height: 10),
+
+                    // ── START TRIP BUTTON ──────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: NavigoSizes.buttonHeight,
+                      child: ElevatedButton(
+                        style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const DriverLiveTripScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Start Trip",
+                          style: NavigoTextStyles.button,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Center(
+                      child: Text(
+                        "Starting the trip will share your live location",
+                        style: NavigoTextStyles.bodySmall.copyWith(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: NavigoSizes.itemGap),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 16),
-
-              const Text(
-                "Passengers",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: passengers.length,
-                  itemBuilder: (context, index) {
-                    return _PassengerTile(
-                      passengerName: passengers[index]["name"]!,
-                      pickup: passengers[index]["pickup"]!,
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DriverLiveTripScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "Start Trip",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              const Center(
-                child: Text(
-                  "Starting the trip will share your live location",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -180,19 +191,17 @@ class _InfoItem extends StatelessWidget {
       children: [
         Text(
           "$title: ",
-          style: const TextStyle(
-            fontSize: 11,
-            color: Colors.grey,
-          ),
+          style: NavigoTextStyles.bodySmall.copyWith(fontSize: 11),
         ),
         Expanded(
           child: Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: NavigoTextStyles.bodySmall.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
+              color: NavigoColors.textDark,
             ),
           ),
         ),
@@ -205,25 +214,18 @@ class _PassengerTile extends StatelessWidget {
   final String passengerName;
   final String pickup;
 
-  const _PassengerTile({
-    required this.passengerName,
-    required this.pickup,
-  });
+  const _PassengerTile({required this.passengerName, required this.pickup});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: NavigoDecorations.kCardDecoration,
       child: Row(
         children: [
           const CircleAvatar(
-            backgroundColor: Colors.orange,
-            child: Icon(Icons.person, color: Colors.white),
+            backgroundColor: NavigoColors.accentGreen,
+            child: Icon(Icons.person, color: NavigoColors.textLight),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -232,17 +234,12 @@ class _PassengerTile extends StatelessWidget {
               children: [
                 Text(
                   passengerName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: NavigoTextStyles.titleSmall.copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   "Pickup: $pickup",
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                  style: NavigoTextStyles.bodySmall.copyWith(fontSize: 12),
                 ),
               ],
             ),

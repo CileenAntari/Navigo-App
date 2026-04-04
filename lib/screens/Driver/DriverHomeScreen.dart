@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/app_theme.dart';
 import 'DriverBottomNavBar.dart';
-import 'DriverTripsScreen.dart';
 import 'DriverRequestsScreen.dart';
+import 'DriverTripsScreen.dart';
 
 class DriverHomeScreen extends StatelessWidget {
   const DriverHomeScreen({super.key});
@@ -9,7 +11,7 @@ class DriverHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: NavigoColors.backgroundLight,
       bottomNavigationBar: const DriverBottomNavBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
@@ -17,122 +19,20 @@ class DriverHomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              /// Header + Driver Info
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Driver Home",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 6),
-
-                      /// Driver Info بدل الوصف القديم
-                      Text(
-                        "Line 12",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        "Vehicle: Microbus",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        "Plate: 7-12345",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.green.withOpacity(0.1),
-                    child: const Icon(Icons.directions_bus, color: Colors.green),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              /// Today Summary Card (with Available)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    /// Title + Available
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Today's Summary",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            "Available",
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    const Text("Trips: 8"),
-                    const Text("Earnings: 54 NIS"),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              /// Trip Details Button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const DriverTripsScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Trip Details",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+              NavigoDecorations.homeStyleTitleBar(
+                title: "Driver Home",
+                subtitle: "Track your line and manage requests",
+                avatar: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: NavigoColors.surfaceWhite,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        fit: BoxFit.contain,
+                        width: 30,
+                        height: 30,
                       ),
                     ),
                   ),
@@ -141,32 +41,98 @@ class DriverHomeScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              /// Open Requests Button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const DriverRequestsScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Open Requests",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Line 12", style: NavigoTextStyles.bodySmall),
+                      Text(
+                        "Vehicle: Microbus",
+                        style: NavigoTextStyles.bodySmall,
                       ),
+                      Text("Plate: 7-12345", style: NavigoTextStyles.bodySmall),
+                    ],
+                  ),
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: NavigoColors.successLight,
+                    child: const Icon(
+                      Icons.directions_bus,
+                      color: NavigoColors.accentGreen,
                     ),
                   ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: NavigoDecorations.kLightCardDecoration,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Today's Summary",
+                          style: NavigoTextStyles.titleSmall,
+                        ),
+                        NavigoDecorations.statusChip(
+                          label: "Available",
+                          color: NavigoColors.accentGreen,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text("Trips: 8", style: NavigoTextStyles.bodyMedium),
+                    const Text(
+                      "Earnings: 54 NIS",
+                      style: NavigoTextStyles.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: NavigoSizes.buttonHeight,
+                child: ElevatedButton(
+                  style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DriverTripsScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text("Trip Details"),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: NavigoSizes.buttonHeight,
+                child: ElevatedButton(
+                  style: NavigoDecorations.kPrimaryButtonLargeStyle,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DriverRequestsScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text("Open Requests"),
                 ),
               ),
             ],

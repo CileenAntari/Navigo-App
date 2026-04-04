@@ -72,8 +72,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         controller: _controller,
                         maxLines: 6,
 
-                        /// ✅ Make text black
-                        style: const TextStyle(color: NavigoColors.textDark),
+                        style: NavigoTextStyles.titleMedium,
 
                         decoration: NavigoDecorations.kInputDecoration.copyWith(
                           hintText: "Write your complaint here...",

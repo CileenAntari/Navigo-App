@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import '../Driver/DriverProfileScreen.dart';
 import '../Driver/DriverRequestsScreen.dart';
 import '../Driver/DriverTripsScreen.dart';
@@ -40,12 +41,7 @@ class DriverBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10),
-        ],
-      ),
+      decoration: NavigoDecorations.kBottomNavDecoration,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -73,20 +69,10 @@ class DriverBottomNavBar extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => _onItemTapped(context, index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: isActive ? Colors.green : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isActive ? Colors.green : Colors.grey,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-        ],
+      child: NavigoDecorations.navItem(
+        icon: icon,
+        label: label,
+        isActive: isActive,
       ),
     );
   }
